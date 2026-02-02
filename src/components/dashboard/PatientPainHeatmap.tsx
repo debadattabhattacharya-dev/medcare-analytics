@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CallRecord, getUniqueLocations, getUniqueConcerns, getUnhappyCases } from "@/data/medcareData";
+import { CallRecord, getClinicLocations, getConcernCategories } from "@/data/medcareData";
 import { cn } from "@/lib/utils";
 
 interface PatientPainHeatmapProps {
@@ -15,8 +15,8 @@ export function PatientPainHeatmap({
   selectedLocation,
 }: PatientPainHeatmapProps) {
   const { heatmapData, locations, concerns } = useMemo(() => {
-    const locations = getUniqueLocations(data);
-    const concerns = getUniqueConcerns(data);
+    const locations = getClinicLocations(data);
+    const concerns = getConcernCategories(data);
 
     // Create heatmap matrix
     const matrix: Record<string, Record<string, { unhappy: number; total: number; percentage: number }>> = {};

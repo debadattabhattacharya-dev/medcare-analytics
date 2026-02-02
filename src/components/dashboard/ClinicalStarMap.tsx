@@ -11,7 +11,7 @@ import {
   Cell,
   ZAxis,
 } from "recharts";
-import { CallRecord, getDoctorStats } from "@/data/medcareData";
+import { CallRecord, getDoctorPerformance } from "@/data/medcareData";
 import { Stethoscope } from "lucide-react";
 
 interface ClinicalStarMapProps {
@@ -25,7 +25,7 @@ export function ClinicalStarMap({ data, selectedLocation }: ClinicalStarMapProps
       ? data.filter((r) => r.Clinic_Location === selectedLocation)
       : data;
     
-    return getDoctorStats(filteredData)
+    return getDoctorPerformance(filteredData)
       .filter((d) => d.mentions > 0 && d.avgCSAT > 0)
       .map((d) => ({
         ...d,

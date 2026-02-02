@@ -6,6 +6,7 @@ import { TopIssuesList } from "@/components/dashboard/TopIssuesList";
 import { PatientPainHeatmap } from "@/components/dashboard/PatientPainHeatmap";
 import { ClinicalStarMap } from "@/components/dashboard/ClinicalStarMap";
 import { WarRoomTriage } from "@/components/dashboard/WarRoomTriage";
+import { InsightsSection } from "@/components/dashboard/InsightsSection";
 import {
   validRecords,
   calculateNHS,
@@ -87,7 +88,10 @@ const Index = () => {
           <ClinicalStarMap data={validRecords} selectedLocation={selectedLocation} />
         </div>
 
-        {/* Row 3: War Room Triage */}
+        {/* Row 3: Deep Insights */}
+        <InsightsSection data={validRecords} selectedLocation={selectedLocation} />
+
+        {/* Row 4: War Room Triage */}
         <WarRoomTriage data={validRecords} selectedLocation={selectedLocation} />
 
         {/* Footer */}
