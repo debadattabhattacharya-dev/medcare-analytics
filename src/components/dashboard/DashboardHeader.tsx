@@ -6,7 +6,8 @@ import {
   calculateNHS,
   getHighChurnCases,
 } from "@/data/medcareData";
-import { Activity, AlertTriangle, TrendingUp, RefreshCw } from "lucide-react";
+import { MedcareLogo } from "./MedcareLogo";
+import { AlertTriangle, TrendingUp, RefreshCw } from "lucide-react";
 
 interface DashboardHeaderProps {
   selectedLocation: string | null;
@@ -37,9 +38,7 @@ export function DashboardHeader({ selectedLocation, onClearFilter }: DashboardHe
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           {/* Branding */}
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl gradient-teal flex items-center justify-center">
-              <Activity className="h-6 w-6 text-white" />
-            </div>
+            <MedcareLogo className="h-12 w-14" />
             <div>
               <h1 className="text-xl font-bold tracking-tight">
                 Medcare <span className="text-teal">VoC Analytics</span>
