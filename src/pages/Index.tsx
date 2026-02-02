@@ -7,7 +7,9 @@ import { PatientPainHeatmap } from "@/components/dashboard/PatientPainHeatmap";
 import { ClinicalStarMap } from "@/components/dashboard/ClinicalStarMap";
 import { WarRoomTriage } from "@/components/dashboard/WarRoomTriage";
 import { InsightsSection } from "@/components/dashboard/InsightsSection";
+import { TrustIndicatorCard } from "@/components/dashboard/TrustIndicatorCard";
 import {
+  allRecords,
   validRecords,
   calculateNHS,
   getHighChurnCases,
@@ -22,6 +24,10 @@ const Index = () => {
   const filteredData = selectedLocation
     ? validRecords.filter((r) => r.Clinic_Location === selectedLocation)
     : validRecords;
+
+  const allFilteredData = selectedLocation
+    ? allRecords.filter((r) => r.Clinic_Location === selectedLocation)
+    : allRecords;
 
   const nhs = calculateNHS(filteredData);
   const highChurnCases = getHighChurnCases(filteredData);
@@ -40,8 +46,8 @@ const Index = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <MetricCard
             title="Total Interactions"
-            value={filteredData.length}
-            subtitle="Valid call records"
+            value={allFilteredData.length}
+            subtitle="All call recordings"
             icon={Users}
             variant="default"
           />
@@ -67,6 +73,9 @@ const Index = () => {
             variant="warning"
           />
         </div>
+
+        {/* Row 0.5: Trust Indicator */}
+        <TrustIndicatorCard data={allRecords} selectedLocation={selectedLocation} />
 
         {/* Row 1: Happiness Trend + Top Issues */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

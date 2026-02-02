@@ -166,6 +166,46 @@ const rawData = [
   { Call_ID: "MC234", Agent_Name: "Aisha Al-Hammadi", Duration: 66, Customer_Name: "Amna Bint Ahmed Al-Nahyan", Intent: "Follow-up", Vibe: "Frustrated", Sentiment: "Negative", Purpose: "Recovery Check", Patient_Advocate_Category: "N/A", Patient_Type: "Guardian", Visit_Type: "Admission", Primary_Concern_Category: "N/A", Emotional_Shift: "Neut to Neg", Trust_Confidence_Indicator: "N/A", Patient_Happy: "N/A", Happiness_Reason: "N/A", Patient_Unhappy: "No", Unhappy_Reason: "Audio issues", Doctor_Mention_Flag: "Yes", Doctor_Name: "Ibrahim", Doctor_CSAT: 0, Clinic_Location: "Sharjah Hospital", Positive_Service_Drivers: "N/A", Competitor_Mention_Flag: "No", Competitor_Name: "N/A", Competitor_Reason: "N/A", Churn_Threat: "Medium", Churn_Reason: "Process Gap", Retention_Propensity: "N/A", Insurance_Friction_Flag: "No", Patient_Satisfaction_Score_10: 0, NPS_Score_10: 0, Caregiver_Rating_5: 0, Patient_Satisfaction_Score: 0, AI_Recommendations: "Resolve phone audio quality to prevent broken follow-up calls." },
 ];
 
+// Add missing MC235 so the demo matches the expected “235 call recordings”.
+// (The source sheet we have in-code ends at MC234.)
+rawData.push({
+  Call_ID: "MC235",
+  Agent_Name: "N/A",
+  Duration: 0,
+  Customer_Name: "N/A",
+  Intent: "N/A",
+  Vibe: "N/A",
+  Sentiment: "N/A",
+  Purpose: "N/A",
+  Patient_Advocate_Category: "N/A",
+  Patient_Type: "N/A",
+  Visit_Type: "N/A",
+  Primary_Concern_Category: "N/A",
+  Emotional_Shift: "N/A",
+  Trust_Confidence_Indicator: "N/A",
+  Patient_Happy: "N/A",
+  Happiness_Reason: "N/A",
+  Patient_Unhappy: "N/A",
+  Unhappy_Reason: "N/A",
+  Doctor_Mention_Flag: "N/A",
+  Doctor_Name: "N/A",
+  Doctor_CSAT: 0,
+  Clinic_Location: "N/A",
+  Positive_Service_Drivers: "N/A",
+  Competitor_Mention_Flag: "No",
+  Competitor_Name: "N/A",
+  Competitor_Reason: "N/A",
+  Churn_Threat: "N/A",
+  Churn_Reason: "N/A",
+  Retention_Propensity: "N/A",
+  Insurance_Friction_Flag: "No",
+  Patient_Satisfaction_Score_10: 0,
+  NPS_Score_10: 0,
+  Caregiver_Rating_5: 0,
+  Patient_Satisfaction_Score: 0,
+  AI_Recommendations: "No Transcript / Failed Call.",
+});
+
 // Simulate 30-day timeline by mapping Call_ID index to dates
 const startDate = new Date("2026-01-03");
 const processedData: CallRecord[] = rawData.map((record, index) => {
@@ -184,7 +224,7 @@ export const validRecords = processedData.filter(
   (r) => r.Sentiment !== "N/A" && r.Duration > 10
 );
 
-// Export all records for total count
+// Full dataset (including voicemail/failed calls) — used for “Total Interactions”.
 export const allRecords = processedData;
 
 // Calculate Net Happiness Score (NHS) - CAPPED AT 100%
@@ -293,10 +333,12 @@ export const getTopUnhappyReasons = (records: CallRecord[]) => {
 // Get persona distribution by sentiment
 export const getPersonaSentiment = (records: CallRecord[]) => {
   const personaMap = new Map<string, { positive: number; neutral: number; negative: number; total: number }>();
+
+  const allowed = new Set(["Patient", "Attendant", "Guardian"]);
   
   records.forEach((r) => {
     const persona = r.Patient_Advocate_Category;
-    if (persona && persona !== "N/A") {
+    if (persona && persona !== "N/A" && allowed.has(persona)) {
       const existing = personaMap.get(persona) || { positive: 0, neutral: 0, negative: 0, total: 0 };
       existing.total += 1;
       if (r.Sentiment === "Positive") existing.positive += 1;
@@ -339,12 +381,49 @@ export const getCompetitorMentions = (records: CallRecord[]) => {
   
   return Array.from(competitorMap.entries())
     .sort((a, b) => b[1] - a[1])
-    .slice(0, 5)
     .map(([name, count]) => ({
       name,
       count,
       percentage: total > 0 ? Math.round((count / total) * 100) : 0,
     }));
+};
+
+export type CompetitorImpact = "Good to Medcare" | "Bad to Medcare" | "Neutral";
+
+export const getCompetitorMentionDetails = (records: CallRecord[]) => {
+  return records
+    .filter(
+      (r) =>
+        r.Competitor_Mention_Flag === "Yes" &&
+        r.Competitor_Name &&
+        r.Competitor_Name !== "N/A",
+    )
+    .map((r) => {
+      // Keep naming consistent with getCompetitorMentions
+      let name = r.Competitor_Name;
+      if (name.includes("Aster")) name = "Aster";
+      if (name.includes("NMC")) name = "NMC";
+      if (name.includes("Saudi German")) name = "Saudi German";
+      if (name.includes("Mediclinic")) name = "Mediclinic";
+      if (name.includes("King's")) name = "King's College";
+      if (name.includes("Dubai Hospital")) name = "Dubai Hospital";
+      if (name.includes("Other")) name = "Other Hospitals";
+
+      let impact: CompetitorImpact = "Neutral";
+      if (r.Churn_Threat === "High" || r.Sentiment === "Negative") impact = "Bad to Medcare";
+      else if (r.Sentiment === "Positive" && r.Churn_Threat === "Low") impact = "Good to Medcare";
+
+      return {
+        competitor: name,
+        Call_ID: r.Call_ID,
+        Customer_Name: r.Customer_Name,
+        Clinic_Location: r.Clinic_Location,
+        Sentiment: r.Sentiment,
+        Churn_Threat: r.Churn_Threat,
+        reason: r.Competitor_Reason && r.Competitor_Reason !== "N/A" ? r.Competitor_Reason : "Not specified",
+        impact,
+      };
+    });
 };
 
 // Get vibe analysis
@@ -353,15 +432,16 @@ export const getVibeAnalysis = (records: CallRecord[]) => {
   
   records.forEach((r) => {
     if (r.Vibe && r.Vibe !== "N/A" && r.Vibe !== "Automated") {
-      // Categorize vibes
+      // Dataset-aligned vibe buckets (clean, CXO-friendly, readable)
       let category = "Other";
       const vibe = r.Vibe.toLowerCase();
-      if (vibe.includes("professional")) category = "Professional";
-      else if (vibe.includes("helpful") || vibe.includes("caring") || vibe.includes("empathetic")) category = "Helpful";
-      else if (vibe.includes("warm") || vibe.includes("appreciative") || vibe.includes("positive")) category = "Warm";
-      else if (vibe.includes("frustrated") || vibe.includes("dissatisfied") || vibe.includes("critical")) category = "Defensive";
-      else if (vibe.includes("confused") || vibe.includes("concerned")) category = "Confused";
-      else if (vibe.includes("polite") || vibe.includes("courteous")) category = "Professional";
+      if (vibe.includes("frustrated") || vibe.includes("dissatisfied") || vibe.includes("angry")) category = "Frustrated";
+      else if (vibe.includes("concerned") || vibe.includes("confused") || vibe.includes("anxious")) category = "Concerned";
+      else if (vibe.includes("appreciative") || vibe.includes("positive")) category = "Appreciative";
+      else if (vibe.includes("cooperative")) category = "Cooperative";
+      else if (vibe.includes("polite") || vibe.includes("courteous")) category = "Polite";
+      else if (vibe.includes("brief")) category = "Brief";
+      else if (vibe.includes("professional")) category = "Professional";
       
       vibeMap.set(category, (vibeMap.get(category) || 0) + 1);
     }
@@ -376,4 +456,19 @@ export const getVibeAnalysis = (records: CallRecord[]) => {
       count,
       percentage: total > 0 ? Math.round((count / total) * 100) : 0,
     }));
+};
+
+export const getTrustIndicator = (records: CallRecord[]) => {
+  const usable = records.filter((r) => r.Trust_Confidence_Indicator && r.Trust_Confidence_Indicator !== "N/A");
+  const present = usable.filter((r) => r.Trust_Confidence_Indicator === "Present").length;
+  const absent = usable.filter((r) => r.Trust_Confidence_Indicator === "Absent").length;
+  const denom = present + absent;
+  const trustPercent = denom > 0 ? Math.round((present / denom) * 100) : 0;
+
+  return {
+    trustPercent,
+    present,
+    absent,
+    totalWithTrustSignal: denom,
+  };
 };
