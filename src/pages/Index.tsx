@@ -7,7 +7,7 @@ import { PatientPainHeatmap } from "@/components/dashboard/PatientPainHeatmap";
 import { ClinicalStarMap } from "@/components/dashboard/ClinicalStarMap";
 import { WarRoomTriage } from "@/components/dashboard/WarRoomTriage";
 import { InsightsSection } from "@/components/dashboard/InsightsSection";
-import { TrustIndicatorCard } from "@/components/dashboard/TrustIndicatorCard";
+
 import {
   allRecords,
   validRecords,
@@ -74,8 +74,6 @@ const Index = () => {
           />
         </div>
 
-        {/* Row 0.5: Trust Indicator */}
-        <TrustIndicatorCard data={allRecords} selectedLocation={selectedLocation} />
 
         {/* Row 1: Happiness Trend + Top Issues */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

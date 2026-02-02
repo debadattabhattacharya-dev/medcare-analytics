@@ -5,7 +5,6 @@ import { VibeAnalysisCard } from "@/components/dashboard/insights/VibeAnalysisCa
 import {
   CallRecord,
   getPersonaSentiment,
-  getCompetitorMentions,
   getVibeAnalysis,
 } from "@/data/medcareData";
 
@@ -22,7 +21,6 @@ export function InsightsSection({ data, selectedLocation }: InsightsSectionProps
   }, [data, selectedLocation]);
 
   const personaData = useMemo(() => getPersonaSentiment(filteredData), [filteredData]);
-  const competitorData = useMemo(() => getCompetitorMentions(filteredData), [filteredData]);
   const vibeData = useMemo(() => getVibeAnalysis(filteredData), [filteredData]);
 
   return (
@@ -36,7 +34,8 @@ export function InsightsSection({ data, selectedLocation }: InsightsSectionProps
         )}
       </h2>
       
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Responsive grid: 1 col on mobile, 3 cols on large screens */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 auto-rows-fr">
         <StakeholderSentimentCard data={personaData} />
         <CompetitorMentionsCard data={filteredData} />
         <VibeAnalysisCard data={vibeData} />
