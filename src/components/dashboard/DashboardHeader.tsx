@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
+  allRecords,
   validRecords,
   calculateNHS,
   getHighChurnCases,
@@ -16,17 +17,21 @@ interface DashboardHeaderProps {
 
 export function DashboardHeader({ selectedLocation, onClearFilter }: DashboardHeaderProps) {
   const metrics = useMemo(() => {
-    const filteredData = selectedLocation
+    const filteredValid = selectedLocation
       ? validRecords.filter((r) => r.Clinic_Location === selectedLocation)
       : validRecords;
 
-    const nhs = calculateNHS(filteredData);
-    const highChurnCases = getHighChurnCases(filteredData);
+    const filteredAll = selectedLocation
+      ? allRecords.filter((r) => r.Clinic_Location === selectedLocation)
+      : allRecords;
+
+    const nhs = calculateNHS(filteredValid);
+    const highChurnCases = getHighChurnCases(filteredValid);
     const revenueAtRisk = highChurnCases.length * 50000;
 
     return {
       nhs,
-      totalCalls: filteredData.length,
+      totalCalls: filteredAll.length,
       highChurnCount: highChurnCases.length,
       revenueAtRisk,
     };
