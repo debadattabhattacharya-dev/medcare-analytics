@@ -131,53 +131,56 @@ export function CompetitorMentionsCard({ data }: { data: CallRecord[] }) {
           {/* Donut chart with total in center */}
           <div className="relative h-[320px] w-full">
             {competitorData.length > 0 ? (
-              <TooltipProvider>
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart margin={{ top: 30, right: 60, bottom: 30, left: 60 }}>
-                    <Pie
-                      data={competitorData}
-                      dataKey="count"
-                      nameKey="name"
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={55}
-                      outerRadius={85}
-                      paddingAngle={2}
-                      label={renderCustomLabel}
-                      labelLine={renderLabelLine}
-                      style={{ cursor: "pointer" }}
-                      onClick={(entry: any) => onPickCompetitor(entry?.name)}
-                    >
-                      {competitorData.map((entry, i) => (
-                        <Cell key={entry.name} fill={COLORS[i % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <RechartsTooltip
-                      content={({ active, payload }) => {
-                        if (!active || !payload?.length) return null;
-                        const item = payload[0].payload;
-                        return (
-                          <div className="rounded-lg border bg-card p-3 shadow-lg max-w-xs">
-                            <div className="font-semibold text-foreground">{item.name}</div>
-                            <div className="text-sm text-foreground mt-1">
-                              <span className="font-mono">{item.count}</span> calls ({item.percentage}%)
+              <>
+                <TooltipProvider>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart margin={{ top: 30, right: 60, bottom: 30, left: 60 }}>
+                      <Pie
+                        data={competitorData}
+                        dataKey="count"
+                        nameKey="name"
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={55}
+                        outerRadius={85}
+                        paddingAngle={2}
+                        label={renderCustomLabel}
+                        labelLine={renderLabelLine}
+                        style={{ cursor: "pointer" }}
+                        onClick={(entry: any) => onPickCompetitor(entry?.name)}
+                      >
+                        {competitorData.map((entry, i) => (
+                          <Cell key={entry.name} fill={COLORS[i % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <RechartsTooltip
+                        wrapperStyle={{ zIndex: 50 }}
+                        content={({ active, payload }) => {
+                          if (!active || !payload?.length) return null;
+                          const item = payload[0].payload;
+                          return (
+                            <div className="rounded-lg border bg-card p-3 shadow-lg max-w-xs z-50">
+                              <div className="font-semibold text-foreground">{item.name}</div>
+                              <div className="text-sm text-foreground mt-1">
+                                <span className="font-mono">{item.count}</span> calls ({item.percentage}%)
+                              </div>
+                              <div className="text-xs text-muted-foreground mt-2">
+                                Click to see patient details
+                              </div>
                             </div>
-                            <div className="text-xs text-muted-foreground mt-2">
-                              Click to see patient details
-                            </div>
-                          </div>
-                        );
-                      }}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
+                          );
+                        }}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </TooltipProvider>
                 {/* Center total */}
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
                   <div className="text-center">
                     <div className="text-2xl font-bold text-foreground">Total: {totalMentions}</div>
                   </div>
                 </div>
-              </TooltipProvider>
+              </>
             ) : (
               <div className="h-full flex items-center justify-center text-muted-foreground">
                 No competitor mentions

@@ -127,11 +127,12 @@ export function VibeAnalysisCard({
                     ))}
                   </Pie>
                   <RechartsTooltip
+                    wrapperStyle={{ zIndex: 50 }}
                     content={({ active, payload }) => {
                       if (!active || !payload?.length) return null;
                       const item = payload[0].payload;
                       return (
-                        <div className="rounded-lg border bg-card p-3 shadow-lg max-w-xs">
+                        <div className="rounded-lg border bg-card p-3 shadow-lg max-w-xs z-50">
                           <div className="font-semibold text-foreground">{item.vibe}</div>
                           <div className="text-sm text-foreground mt-1">
                             <span className="font-mono">{item.count}</span> calls ({item.percentage}%)
@@ -145,13 +146,13 @@ export function VibeAnalysisCard({
                   />
                 </PieChart>
               </ResponsiveContainer>
-              {/* Center total */}
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-foreground">Total: {totalCalls}</div>
-                </div>
-              </div>
             </TooltipProvider>
+            {/* Center total - moved outside TooltipProvider and given lower z-index */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-foreground">Total: {totalCalls}</div>
+              </div>
+            </div>
           </div>
 
           {/* Legend with clickable items */}
