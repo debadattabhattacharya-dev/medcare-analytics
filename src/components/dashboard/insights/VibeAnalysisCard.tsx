@@ -1,15 +1,19 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
+import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip as RechartsTooltip } from "recharts";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
+// Yellow-to-green gradient palette (consistent across all charts)
 const VIBE_COLORS: Record<string, string> = {
-  Professional: "hsl(var(--teal))",
-  Appreciative: "hsl(var(--success))",
-  Polite: "hsl(var(--accent-foreground))",
-  Cooperative: "hsl(var(--primary))",
-  Concerned: "hsl(var(--warning))",
-  Frustrated: "hsl(var(--coral))",
-  Brief: "hsl(var(--muted-foreground))",
-  Other: "hsl(var(--muted-foreground))",
+  Professional: "#22c55e",   // Green
+  Polite: "#4ade80",         // Light green
+  Appreciative: "#86efac",   // Lighter green
+  Cooperative: "#facc15",    // Yellow
+  Concerned: "#fde047",      // Light yellow
+  Brief: "#fef08a",          // Lighter yellow
+  Frustrated: "#f97316",     // Orange (warning)
+  Other: "#94a3b8",          // Gray
 };
 
 export function VibeAnalysisCard({
@@ -17,57 +21,169 @@ export function VibeAnalysisCard({
 }: {
   data: Array<{ vibe: string; percentage: number; count: number }>;
 }) {
+  const [selectedVibe, setSelectedVibe] = useState<string | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  const totalCalls = data.reduce((sum, v) => sum + v.count, 0);
+
+  const onPickVibe = (vibe: string) => {
+    setSelectedVibe(vibe);
+    setDialogOpen(true);
+  };
+
+  // Custom label for pie chart segments
+  const renderCustomLabel = ({ vibe, percentage, cx, cy, midAngle, outerRadius }: any) => {
+    const RADIAN = Math.PI / 180;
+    const radius = outerRadius + 30;
+    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+    if (percentage < 8) return null; // Don't show label for small segments
+
+    return (
+      <text
+        x={x}
+        y={y}
+        fill="hsl(var(--foreground))"
+        textAnchor={x > cx ? "start" : "end"}
+        dominantBaseline="central"
+        className="text-xs font-medium"
+      >
+        {vibe}: {percentage}%
+      </text>
+    );
+  };
+
+  const getVibeDescription = (vibe: string): string => {
+    switch (vibe) {
+      case "Professional": return "Calm, business-like communication";
+      case "Polite": return "Courteous and respectful tone";
+      case "Appreciative": return "Expressing gratitude and thanks";
+      case "Cooperative": return "Willing to engage and collaborate";
+      case "Concerned": return "Worried or anxious about situation";
+      case "Brief": return "Short, to-the-point conversation";
+      case "Frustrated": return "Showing signs of dissatisfaction";
+      default: return "Other communication style";
+    }
+  };
+
   return (
-    <Card className="shadow-healthcare">
+    <Card className="shadow-healthcare h-full">
       <CardHeader className="pb-2">
         <CardTitle className="text-base font-semibold">How Did The Call Feel?</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="h-[280px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={data}
-                dataKey="count"
-                nameKey="vibe"
-                cx="50%"
-                cy="50%"
-                innerRadius={52}
-                outerRadius={100}
-                paddingAngle={2}
-              >
-                {data.map((entry, index) => (
-                  <Cell key={`${entry.vibe}-${index}`} fill={VIBE_COLORS[entry.vibe] || VIBE_COLORS.Other} />
-                ))}
-              </Pie>
-              <Tooltip
-                formatter={(value: number, _name: any, props: any) => {
-                  const pct = props?.payload?.percentage ?? 0;
-                  return [`${value} calls (${pct}%)`, "Vibe"];
-                }}
-                contentStyle={{
-                  backgroundColor: "hsl(var(--card))",
-                  border: "1px solid hsl(var(--border))",
-                  borderRadius: "12px",
-                  color: "hsl(var(--foreground))",
-                  fontSize: "12px",
-                }}
-              />
-            </PieChart>
-          </ResponsiveContainer>
+        <div className="flex flex-col items-center">
+          {/* Donut chart with total in center */}
+          <div className="relative h-[280px] w-full">
+            <TooltipProvider>
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={data}
+                    dataKey="count"
+                    nameKey="vibe"
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={70}
+                    outerRadius={110}
+                    paddingAngle={2}
+                    label={renderCustomLabel}
+                    labelLine={false}
+                    style={{ cursor: "pointer" }}
+                    onClick={(entry: any) => onPickVibe(entry?.vibe)}
+                  >
+                    {data.map((entry, index) => (
+                      <Cell 
+                        key={`${entry.vibe}-${index}`} 
+                        fill={VIBE_COLORS[entry.vibe] || VIBE_COLORS.Other} 
+                      />
+                    ))}
+                  </Pie>
+                  <RechartsTooltip
+                    content={({ active, payload }) => {
+                      if (!active || !payload?.length) return null;
+                      const item = payload[0].payload;
+                      return (
+                        <div className="rounded-lg border bg-card p-3 shadow-lg max-w-xs">
+                          <div className="font-semibold text-foreground">{item.vibe}</div>
+                          <div className="text-sm text-foreground mt-1">
+                            <span className="font-mono">{item.count}</span> calls ({item.percentage}%)
+                          </div>
+                          <div className="text-xs text-muted-foreground mt-2">
+                            {getVibeDescription(item.vibe)}
+                          </div>
+                        </div>
+                      );
+                    }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+              {/* Center total */}
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-foreground">{totalCalls}</div>
+                  <div className="text-xs text-muted-foreground">Total Calls</div>
+                </div>
+              </div>
+            </TooltipProvider>
+          </div>
+
+          {/* Legend with clickable items */}
+          <div className="mt-4 grid grid-cols-2 gap-2 w-full">
+            {data.slice(0, 8).map((v) => (
+              <Tooltip key={v.vibe}>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => onPickVibe(v.vibe)}
+                    className="flex items-center justify-between gap-2 rounded-md border bg-card px-3 py-2 text-left hover:bg-muted transition-colors w-full"
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span 
+                        className="h-3 w-3 rounded flex-shrink-0" 
+                        style={{ background: VIBE_COLORS[v.vibe] || VIBE_COLORS.Other }} 
+                      />
+                      <span className="text-sm font-medium text-foreground truncate">{v.vibe}</span>
+                    </div>
+                    <span className="text-sm font-mono text-muted-foreground flex-shrink-0">{v.percentage}%</span>
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{v.count} calls with {v.vibe} vibe</p>
+                  <p className="text-xs text-muted-foreground">{getVibeDescription(v.vibe)}</p>
+                </TooltipContent>
+              </Tooltip>
+            ))}
+          </div>
         </div>
 
-        <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2">
-          {data.slice(0, 8).map((v) => (
-            <div key={v.vibe} className="flex items-center justify-between gap-3 rounded-md border bg-card px-3 py-2">
-              <div className="flex items-center gap-2">
-                <span className="h-2.5 w-2.5 rounded" style={{ background: VIBE_COLORS[v.vibe] || VIBE_COLORS.Other }} />
-                <span className="text-sm font-medium text-foreground">{v.vibe}</span>
+        {/* Details Dialog */}
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-lg font-semibold flex items-center gap-2">
+                <span 
+                  className="h-4 w-4 rounded" 
+                  style={{ background: VIBE_COLORS[selectedVibe || "Other"] || VIBE_COLORS.Other }} 
+                />
+                {selectedVibe} Calls
+              </DialogTitle>
+            </DialogHeader>
+            <div className="mt-4">
+              <div className="text-center py-8">
+                <div className="text-4xl font-bold text-foreground">
+                  {data.find(v => v.vibe === selectedVibe)?.count || 0}
+                </div>
+                <div className="text-muted-foreground mt-2">
+                  calls with {selectedVibe?.toLowerCase()} tone
+                </div>
+                <div className="text-sm text-muted-foreground mt-4 max-w-xs mx-auto">
+                  {getVibeDescription(selectedVibe || "")}
+                </div>
               </div>
-              <span className="text-xs text-muted-foreground font-mono">{v.percentage}%</span>
             </div>
-          ))}
-        </div>
+          </DialogContent>
+        </Dialog>
       </CardContent>
     </Card>
   );
