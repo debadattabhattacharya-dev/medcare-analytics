@@ -31,14 +31,14 @@ export function VibeAnalysisCard({
     setDialogOpen(true);
   };
 
-  // Custom label for pie chart segments
+  // Custom label with pointer lines (like reference design)
   const renderCustomLabel = ({ vibe, percentage, cx, cy, midAngle, outerRadius }: any) => {
     const RADIAN = Math.PI / 180;
-    const radius = outerRadius + 30;
+    const radius = outerRadius + 24;
     const x = cx + radius * Math.cos(-midAngle * RADIAN);
     const y = cy + radius * Math.sin(-midAngle * RADIAN);
 
-    if (percentage < 8) return null; // Don't show label for small segments
+    if (percentage < 5) return null; // Hide very small segments
 
     return (
       <text
@@ -47,10 +47,36 @@ export function VibeAnalysisCard({
         fill="hsl(var(--foreground))"
         textAnchor={x > cx ? "start" : "end"}
         dominantBaseline="central"
-        className="text-xs font-medium"
+        style={{ fontSize: 11, fontWeight: 500 }}
       >
         {vibe}: {percentage}%
       </text>
+    );
+  };
+
+  // Custom label line (pointer)
+  const renderLabelLine = (props: any) => {
+    const { cx, cy, midAngle, outerRadius, payload } = props;
+    if (payload.percentage < 5) return null;
+    
+    const RADIAN = Math.PI / 180;
+    const startRadius = outerRadius + 4;
+    const endRadius = outerRadius + 18;
+    
+    const x1 = cx + startRadius * Math.cos(-midAngle * RADIAN);
+    const y1 = cy + startRadius * Math.sin(-midAngle * RADIAN);
+    const x2 = cx + endRadius * Math.cos(-midAngle * RADIAN);
+    const y2 = cy + endRadius * Math.sin(-midAngle * RADIAN);
+    
+    return (
+      <line
+        x1={x1}
+        y1={y1}
+        x2={x2}
+        y2={y2}
+        stroke="hsl(var(--muted-foreground))"
+        strokeWidth={1}
+      />
     );
   };
 
@@ -75,21 +101,21 @@ export function VibeAnalysisCard({
       <CardContent>
         <div className="flex flex-col items-center">
           {/* Donut chart with total in center */}
-          <div className="relative h-[280px] w-full">
+          <div className="relative h-[320px] w-full">
             <TooltipProvider>
               <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
+                <PieChart margin={{ top: 30, right: 60, bottom: 30, left: 60 }}>
                   <Pie
                     data={data}
                     dataKey="count"
                     nameKey="vibe"
                     cx="50%"
                     cy="50%"
-                    innerRadius={70}
-                    outerRadius={110}
+                    innerRadius={55}
+                    outerRadius={85}
                     paddingAngle={2}
                     label={renderCustomLabel}
-                    labelLine={false}
+                    labelLine={renderLabelLine}
                     style={{ cursor: "pointer" }}
                     onClick={(entry: any) => onPickVibe(entry?.vibe)}
                   >
@@ -122,8 +148,7 @@ export function VibeAnalysisCard({
               {/* Center total */}
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-foreground">{totalCalls}</div>
-                  <div className="text-xs text-muted-foreground">Total Calls</div>
+                  <div className="text-2xl font-bold text-foreground">Total: {totalCalls}</div>
                 </div>
               </div>
             </TooltipProvider>
