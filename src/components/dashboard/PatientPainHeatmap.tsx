@@ -14,8 +14,22 @@ export function PatientPainHeatmap({
   onLocationSelect,
   selectedLocation,
 }: PatientPainHeatmapProps) {
+  // Clinics to exclude from the heatmap
+  const excludedClinics = [
+    "Dar Al-Hikma",
+    "Discovery Garden",
+    "Eye Centre (SZR)",
+    "Eye Centre SZR",
+    "Jumeirah",
+    "Medcare Raa",
+    "Multispecialty",
+    "Netcare Sharda",
+    "Sharjah Branch 1",
+  ];
+
   const { heatmapData, locations, concerns } = useMemo(() => {
-    const locations = getClinicLocations(data);
+    const allLocations = getClinicLocations(data);
+    const locations = allLocations.filter((loc) => !excludedClinics.includes(loc));
     const concerns = getConcernCategories(data);
 
     // Create heatmap matrix
