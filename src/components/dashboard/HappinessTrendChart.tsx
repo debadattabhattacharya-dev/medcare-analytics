@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
@@ -24,12 +24,20 @@ import { TrendingUp, TrendingDown } from "lucide-react";
 interface HappinessTrendChartProps {
   data: CallRecord[];
   selectedLocation?: string | null;
+  onFilterChange?: (location: string | null) => void;
 }
 
-export function HappinessTrendChart({ data, selectedLocation }: HappinessTrendChartProps) {
-  const [localFilter, setLocalFilter] = useState<string>("all");
-
+export function HappinessTrendChart({ data, selectedLocation, onFilterChange }: HappinessTrendChartProps) {
   const clinicLocations = useMemo(() => getFilteredClinicLocations(data), [data]);
+
+  // Derive localFilter from selectedLocation for controlled behavior
+  const localFilter = selectedLocation || "all";
+
+  const handleFilterChange = (value: string) => {
+    if (onFilterChange) {
+      onFilterChange(value === "all" ? null : value);
+    }
+  };
 
   // Compute clinic-wise NHS for each day
   const clinicDailyNHS = useMemo(() => {
@@ -57,10 +65,9 @@ export function HappinessTrendChart({ data, selectedLocation }: HappinessTrendCh
   }, [data, clinicLocations]);
 
   const chartData = useMemo(() => {
-    // Apply local filter or external selectedLocation
-    const activeFilter = selectedLocation || (localFilter !== "all" ? localFilter : null);
-    const filteredData = activeFilter
-      ? data.filter((r) => r.Clinic_Location === activeFilter)
+    // Apply filter based on selectedLocation
+    const filteredData = selectedLocation
+      ? data.filter((r) => r.Clinic_Location === selectedLocation)
       : data;
 
     // Group by date
@@ -82,14 +89,14 @@ export function HappinessTrendChart({ data, selectedLocation }: HappinessTrendCh
         calls: records.length,
       }))
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-  }, [data, selectedLocation, localFilter]);
+  }, [data, selectedLocation]);
 
   const averageNHS = useMemo(() => {
     if (chartData.length === 0) return 0;
     return Math.round(chartData.reduce((acc, d) => acc + d.nhs, 0) / chartData.length);
   }, [chartData]);
 
-  const activeFilterLabel = selectedLocation || (localFilter !== "all" ? localFilter : null);
+  const activeFilterLabel = selectedLocation;
 
   // Custom tooltip showing best/worst performer based on dip/spike
   const CustomTooltip = ({ active, payload, label }: any) => {
@@ -177,21 +184,19 @@ export function HappinessTrendChart({ data, selectedLocation }: HappinessTrendCh
           </CardTitle>
           <div className="flex items-center gap-4">
             {/* Clinic filter dropdown */}
-            {!selectedLocation && (
-              <Select value={localFilter} onValueChange={setLocalFilter}>
-                <SelectTrigger className="w-[180px] h-8 text-sm">
-                  <SelectValue placeholder="All Clinics" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Clinics</SelectItem>
-                  {clinicLocations.map((loc) => (
-                    <SelectItem key={loc} value={loc}>
-                      {loc}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
+            <Select value={localFilter} onValueChange={handleFilterChange}>
+              <SelectTrigger className="w-[180px] h-8 text-sm">
+                <SelectValue placeholder="All Clinics" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Clinics</SelectItem>
+                {clinicLocations.map((loc) => (
+                  <SelectItem key={loc} value={loc}>
+                    {loc}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <div className="flex items-center gap-4 text-sm">
               <div className="flex items-center gap-2">
                 <div className="h-3 w-3 rounded-full bg-teal" />

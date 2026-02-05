@@ -1,15 +1,15 @@
 import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  ScatterChart,
-  Scatter,
+  BarChart,
+  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
   Cell,
-  ZAxis,
+  LabelList,
 } from "recharts";
 import { CallRecord, getDoctorPerformance } from "@/data/medcareData";
 import { Stethoscope } from "lucide-react";
@@ -27,16 +27,14 @@ export function ClinicalStarMap({ data, selectedLocation }: ClinicalStarMapProps
     
     return getDoctorPerformance(filteredData)
       .filter((d) => d.mentions > 0 && d.avgCSAT > 0)
-      .map((d) => ({
-        ...d,
-        z: Math.max(d.avgNPS * 5, 100), // Size based on NPS, minimum 100
-      }));
+      .sort((a, b) => b.avgCSAT - a.avgCSAT)
+      .slice(0, 10); // Top 10 doctors
   }, [data, selectedLocation]);
 
   const getColor = (csat: number) => {
-    if (csat >= 4.5) return "#008080"; // Teal for great
-    if (csat >= 3.5) return "#f59e0b"; // Warning for medium
-    return "#FF4B4B"; // Coral for poor
+    if (csat >= 4.5) return "hsl(var(--teal))";
+    if (csat >= 3.5) return "hsl(var(--warning))";
+    return "hsl(var(--coral))";
   };
 
   const CustomTooltip = ({ active, payload }: any) => {
@@ -47,13 +45,13 @@ export function ClinicalStarMap({ data, selectedLocation }: ClinicalStarMapProps
           <p className="font-semibold text-foreground">{data.name}</p>
           <div className="mt-2 space-y-1 text-sm">
             <p className="text-muted-foreground">
+              CSAT Score: <span className="font-bold text-foreground">{data.avgCSAT.toFixed(1)}/5</span>
+            </p>
+            <p className="text-muted-foreground">
               Mentions: <span className="font-medium text-foreground">{data.mentions}</span>
             </p>
             <p className="text-muted-foreground">
-              Avg CSAT: <span className="font-medium text-foreground">{data.avgCSAT.toFixed(1)}/5</span>
-            </p>
-            <p className="text-muted-foreground">
-              Avg NPS: <span className="font-medium text-foreground">{data.avgNPS.toFixed(1)}/10</span>
+              NPS: <span className="font-medium text-foreground">{data.avgNPS.toFixed(1)}/10</span>
             </p>
           </div>
         </div>
@@ -70,73 +68,72 @@ export function ClinicalStarMap({ data, selectedLocation }: ClinicalStarMapProps
           <CardTitle className="text-lg font-semibold">Doctor CSAT Performance</CardTitle>
         </div>
         <p className="text-sm text-muted-foreground">
-          Doctor satisfaction: Size = NPS • Color = CSAT rating
+          Average CSAT scores by doctor
           {selectedLocation && ` • ${selectedLocation}`}
         </p>
       </CardHeader>
       <CardContent>
-        <div className="h-[280px]">
+        <div className="h-[320px]">
           {doctorData.length === 0 ? (
             <div className="flex items-center justify-center h-full text-muted-foreground">
               No doctor data available for this filter
             </div>
           ) : (
             <ResponsiveContainer width="100%" height="100%">
-              <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+              <BarChart
+                layout="vertical"
+                data={doctorData}
+                margin={{ top: 5, right: 50, left: 10, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={true} vertical={false} />
                 <XAxis
                   type="number"
-                  dataKey="mentions"
-                  name="Mentions"
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
-                  label={{
-                    value: "Mentions",
-                    position: "bottom",
-                    fill: "hsl(var(--muted-foreground))",
-                    fontSize: 12,
-                  }}
-                />
-                <YAxis
-                  type="number"
-                  dataKey="avgCSAT"
-                  name="CSAT"
                   domain={[0, 5]}
                   axisLine={false}
                   tickLine={false}
                   tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
-                  label={{
-                    value: "Avg CSAT",
-                    angle: -90,
-                    position: "insideLeft",
-                    fill: "hsl(var(--muted-foreground))",
-                    fontSize: 12,
-                  }}
+                  tickFormatter={(value) => `${value}`}
                 />
-                <ZAxis type="number" dataKey="z" range={[100, 500]} />
-                <Tooltip content={<CustomTooltip />} />
-                <Scatter data={doctorData} fill="#008080">
+                <YAxis
+                  type="category"
+                  dataKey="name"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: "hsl(var(--foreground))", fontSize: 12 }}
+                  width={90}
+                />
+                <Tooltip content={<CustomTooltip />} cursor={{ fill: "hsl(var(--muted) / 0.3)" }} />
+                <Bar 
+                  dataKey="avgCSAT" 
+                  radius={[0, 4, 4, 0]}
+                  barSize={24}
+                >
                   {doctorData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={getColor(entry.avgCSAT)} fillOpacity={0.8} />
+                    <Cell key={`cell-${index}`} fill={getColor(entry.avgCSAT)} />
                   ))}
-                </Scatter>
-              </ScatterChart>
+                  <LabelList 
+                    dataKey="avgCSAT" 
+                    position="right" 
+                    formatter={(value: number) => `${value.toFixed(1)}`}
+                    style={{ fill: "hsl(var(--foreground))", fontSize: 11, fontWeight: 600 }}
+                  />
+                </Bar>
+              </BarChart>
             </ResponsiveContainer>
           )}
         </div>
         <div className="flex items-center justify-center gap-6 mt-2 pt-2 border-t">
           <div className="flex items-center gap-2">
-            <div className="h-3 w-3 rounded-full" style={{ backgroundColor: "#008080" }} />
-            <span className="text-xs text-muted-foreground">CSAT ≥ 4.5</span>
+            <div className="h-3 w-3 rounded-full bg-teal" />
+            <span className="text-xs text-muted-foreground">CSAT ≥ 4.5 (Excellent)</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="h-3 w-3 rounded-full" style={{ backgroundColor: "#f59e0b" }} />
-            <span className="text-xs text-muted-foreground">CSAT 3.5-4.4</span>
+            <div className="h-3 w-3 rounded-full bg-warning" />
+            <span className="text-xs text-muted-foreground">CSAT 3.5-4.4 (Good)</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="h-3 w-3 rounded-full" style={{ backgroundColor: "#FF4B4B" }} />
-            <span className="text-xs text-muted-foreground">CSAT &lt; 3.5</span>
+            <div className="h-3 w-3 rounded-full bg-coral" />
+            <span className="text-xs text-muted-foreground">CSAT &lt; 3.5 (Needs Work)</span>
           </div>
         </div>
       </CardContent>
