@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CallRecord, getClinicLocations, getConcernCategories } from "@/data/medcareData";
+import { CallRecord, getFilteredClinicLocations, getConcernCategories } from "@/data/medcareData";
 import { cn } from "@/lib/utils";
 
 interface PatientPainHeatmapProps {
@@ -14,22 +14,9 @@ export function PatientPainHeatmap({
   onLocationSelect,
   selectedLocation,
 }: PatientPainHeatmapProps) {
-  // Clinics to exclude from the heatmap
-  const excludedClinics = [
-    "Dar Al-Hikma",
-    "Discovery Garden",
-    "Eye Centre (SZR)",
-    "Eye Centre SZR",
-    "Jumeirah",
-    "Medcare Raa",
-    "Multispecialty",
-    "Netcare Sharda",
-    "Sharjah Branch 1",
-  ];
 
   const { heatmapData, locations, concerns } = useMemo(() => {
-    const allLocations = getClinicLocations(data);
-    const locations = allLocations.filter((loc) => !excludedClinics.includes(loc));
+    const locations = getFilteredClinicLocations(data);
     const concerns = getConcernCategories(data);
 
     // First, calculate total calls per location for proper percentage calculation

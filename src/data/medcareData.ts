@@ -1,4 +1,18 @@
 // Medcare VoC Analytics Dataset - Simulated with 30-day timeline
+
+// Clinics to exclude from dashboard visualizations (inactive/unspecified)
+export const EXCLUDED_CLINICS = [
+  "Dar Al-Hikma",
+  "Discovery Garden",
+  "Eye Centre (SZR)",
+  "Eye Centre SZR",
+  "Jumeirah",
+  "Medcare Raa",
+  "Multispecialty",
+  "Netcare Sharda",
+  "Sharjah Branch 1",
+];
+
 export interface CallRecord {
   Call_ID: string;
   Agent_Name: string;
@@ -36,6 +50,11 @@ export interface CallRecord {
   Patient_Satisfaction_Score: number;
   AI_Recommendations: string;
   Date: Date;
+}
+
+// Get filtered clinic locations (excluding inactive ones)
+export function getFilteredClinicLocations(data: CallRecord[]): string[] {
+  return getClinicLocations(data).filter((loc) => !EXCLUDED_CLINICS.includes(loc));
 }
 
 // --- Excel row parsing (used to patch gaps without hand-writing 100+ objects) ---
