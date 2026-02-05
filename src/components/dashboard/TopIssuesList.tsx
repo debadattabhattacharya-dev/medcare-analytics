@@ -49,7 +49,7 @@ export function TopIssuesList({ data, selectedLocation, onFilterChange }: TopIss
   };
 
   return (
-    <Card className="shadow-healthcare h-full">
+    <Card className="shadow-healthcare">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
