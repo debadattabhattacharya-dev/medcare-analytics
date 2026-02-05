@@ -82,15 +82,15 @@ const Index = () => {
 
 
         {/* Row 1: Happiness Trend + Top Issues */}
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
-          <div className="lg:col-span-3">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+          <div className="lg:col-span-3 flex">
             <HappinessTrendChart 
               data={validRecords} 
               selectedLocation={selectedLocation}
               onFilterChange={handleTopChartFilterChange}
             />
           </div>
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 flex">
             <TopIssuesList 
               data={validRecords} 
               selectedLocation={selectedLocation}

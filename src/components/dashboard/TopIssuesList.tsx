@@ -49,7 +49,7 @@ export function TopIssuesList({ data, selectedLocation, onFilterChange }: TopIss
   };
 
   return (
-    <Card className="shadow-healthcare">
+    <Card className="shadow-healthcare flex-1 flex flex-col">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
@@ -77,7 +77,7 @@ export function TopIssuesList({ data, selectedLocation, onFilterChange }: TopIss
           <p className="text-xs text-muted-foreground mt-1">Filtered: {activeFilterLabel}</p>
         )}
       </CardHeader>
-      <CardContent className="pt-0">
+      <CardContent className="pt-0 flex-1">
         {issues.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
             <TrendingDown className="h-8 w-8 mb-2 opacity-50" />
