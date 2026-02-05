@@ -171,7 +171,7 @@ export function HappinessTrendChart({ data, selectedLocation, onFilterChange }: 
   };
 
   return (
-    <Card className="shadow-healthcare">
+    <Card className="shadow-healthcare flex-1 flex flex-col">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <CardTitle className="text-lg font-semibold">
@@ -210,8 +210,8 @@ export function HappinessTrendChart({ data, selectedLocation, onFilterChange }: 
           </div>
         </div>
       </CardHeader>
-      <CardContent>
-        <div className="h-[280px]">
+      <CardContent className="flex-1 flex flex-col">
+        <div className="flex-1 min-h-[250px]">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
               <defs>
