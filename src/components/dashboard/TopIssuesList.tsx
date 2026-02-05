@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
@@ -13,25 +13,32 @@ import { AlertTriangle, TrendingDown } from "lucide-react";
 interface TopIssuesListProps {
   data: CallRecord[];
   selectedLocation?: string | null;
+  onFilterChange?: (location: string | null) => void;
 }
 
-export function TopIssuesList({ data, selectedLocation }: TopIssuesListProps) {
-  const [localFilter, setLocalFilter] = useState<string>("all");
-
+export function TopIssuesList({ data, selectedLocation, onFilterChange }: TopIssuesListProps) {
   const clinicLocations = useMemo(() => getFilteredClinicLocations(data), [data]);
 
+  // Derive localFilter from selectedLocation for controlled behavior
+  const localFilter = selectedLocation || "all";
+
+  const handleFilterChange = (value: string) => {
+    if (onFilterChange) {
+      onFilterChange(value === "all" ? null : value);
+    }
+  };
+
   const issues = useMemo(() => {
-    // Apply local filter or external selectedLocation
-    const activeFilter = selectedLocation || (localFilter !== "all" ? localFilter : null);
-    const filteredData = activeFilter
-      ? data.filter((r) => r.Clinic_Location === activeFilter)
+    // Apply filter based on selectedLocation
+    const filteredData = selectedLocation
+      ? data.filter((r) => r.Clinic_Location === selectedLocation)
       : data;
     return getTopUnhappyReasons(filteredData);
-  }, [data, selectedLocation, localFilter]);
+  }, [data, selectedLocation]);
 
   const maxCount = issues.length > 0 ? Math.max(...issues.map((i) => i.count)) : 1;
 
-  const activeFilterLabel = selectedLocation || (localFilter !== "all" ? localFilter : null);
+  const activeFilterLabel = selectedLocation;
 
   // Severity colors based on rank
   const getSeverityColor = (index: number) => {
@@ -52,21 +59,19 @@ export function TopIssuesList({ data, selectedLocation }: TopIssuesListProps) {
             <CardTitle className="text-lg font-semibold">Top Patient Pain Points</CardTitle>
           </div>
           {/* Clinic filter dropdown */}
-          {!selectedLocation && (
-            <Select value={localFilter} onValueChange={setLocalFilter}>
-              <SelectTrigger className="w-[160px] h-8 text-xs">
-                <SelectValue placeholder="All Clinics" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Clinics</SelectItem>
-                {clinicLocations.map((loc) => (
-                  <SelectItem key={loc} value={loc}>
-                    {loc}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
+          <Select value={localFilter} onValueChange={handleFilterChange}>
+            <SelectTrigger className="w-[140px] h-8 text-xs">
+              <SelectValue placeholder="All Clinics" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Clinics</SelectItem>
+              {clinicLocations.map((loc) => (
+                <SelectItem key={loc} value={loc}>
+                  {loc}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         {activeFilterLabel && (
           <p className="text-xs text-muted-foreground mt-1">Filtered: {activeFilterLabel}</p>

@@ -18,7 +18,13 @@ import {
 import { Users, ThumbsUp, ThumbsDown, AlertTriangle } from "lucide-react";
 
 const Index = () => {
+  // Global location filter - controlled from heatmap click OR top chart filters
   const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
+
+  // Handler for top chart filter changes (Happiness Trend & Pain Points)
+  const handleTopChartFilterChange = (location: string | null) => {
+    setSelectedLocation(location);
+  };
 
   // Calculate metrics based on filtered data
   const filteredData = selectedLocation
@@ -76,12 +82,20 @@ const Index = () => {
 
 
         {/* Row 1: Happiness Trend + Top Issues */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            <HappinessTrendChart data={validRecords} selectedLocation={selectedLocation} />
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+          <div className="lg:col-span-3">
+            <HappinessTrendChart 
+              data={validRecords} 
+              selectedLocation={selectedLocation}
+              onFilterChange={handleTopChartFilterChange}
+            />
           </div>
-          <div className="lg:col-span-1">
-            <TopIssuesList data={validRecords} selectedLocation={selectedLocation} />
+          <div className="lg:col-span-2">
+            <TopIssuesList 
+              data={validRecords} 
+              selectedLocation={selectedLocation}
+              onFilterChange={handleTopChartFilterChange}
+            />
           </div>
         </div>
 
