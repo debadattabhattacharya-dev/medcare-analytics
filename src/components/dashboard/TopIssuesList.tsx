@@ -7,8 +7,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CallRecord, getTopUnhappyReasons, getClinicLocations } from "@/data/medcareData";
-import { AlertTriangle } from "lucide-react";
+import { CallRecord, getTopUnhappyReasons, getFilteredClinicLocations } from "@/data/medcareData";
+import { AlertTriangle, TrendingDown } from "lucide-react";
 
 interface TopIssuesListProps {
   data: CallRecord[];
@@ -18,7 +18,7 @@ interface TopIssuesListProps {
 export function TopIssuesList({ data, selectedLocation }: TopIssuesListProps) {
   const [localFilter, setLocalFilter] = useState<string>("all");
 
-  const clinicLocations = useMemo(() => getClinicLocations(data), [data]);
+  const clinicLocations = useMemo(() => getFilteredClinicLocations(data), [data]);
 
   const issues = useMemo(() => {
     // Apply local filter or external selectedLocation
@@ -33,18 +33,28 @@ export function TopIssuesList({ data, selectedLocation }: TopIssuesListProps) {
 
   const activeFilterLabel = selectedLocation || (localFilter !== "all" ? localFilter : null);
 
+  // Severity colors based on rank
+  const getSeverityColor = (index: number) => {
+    if (index === 0) return "bg-coral text-white";
+    if (index === 1) return "bg-coral/80 text-white";
+    if (index === 2) return "bg-coral/60 text-white";
+    return "bg-coral/40 text-foreground";
+  };
+
   return (
     <Card className="shadow-healthcare h-full">
-      <CardHeader className="pb-2">
+      <CardHeader className="pb-3">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5 text-coral" />
+            <div className="p-1.5 rounded-lg bg-coral/10">
+              <AlertTriangle className="h-4 w-4 text-coral" />
+            </div>
             <CardTitle className="text-lg font-semibold">Top Patient Pain Points</CardTitle>
           </div>
           {/* Clinic filter dropdown */}
           {!selectedLocation && (
             <Select value={localFilter} onValueChange={setLocalFilter}>
-              <SelectTrigger className="w-[140px] h-8 text-xs">
+              <SelectTrigger className="w-[160px] h-8 text-xs">
                 <SelectValue placeholder="All Clinics" />
               </SelectTrigger>
               <SelectContent>
@@ -59,53 +69,73 @@ export function TopIssuesList({ data, selectedLocation }: TopIssuesListProps) {
           )}
         </div>
         {activeFilterLabel && (
-          <p className="text-sm text-muted-foreground">Filtered: {activeFilterLabel}</p>
+          <p className="text-xs text-muted-foreground mt-1">Filtered: {activeFilterLabel}</p>
         )}
       </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {issues.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-8">
-              No issues found for this filter
-            </p>
-          ) : (
-            issues.map((issue, index) => (
-              <div key={issue.reason} className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-coral/10 text-xs font-bold text-coral">
-                      {index + 1}
-                    </span>
-                    <span className="text-sm font-medium truncate max-w-[140px]" title={issue.reason}>
+      <CardContent className="pt-0">
+        {issues.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
+            <TrendingDown className="h-8 w-8 mb-2 opacity-50" />
+            <p className="text-sm">No issues found for this filter</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {/* Header row */}
+            <div className="flex items-center justify-end gap-6 text-xs text-muted-foreground px-1 pb-1 border-b">
+              <span className="w-12 text-center">Count</span>
+              <span className="w-14 text-center">Share</span>
+            </div>
+            
+            {issues.map((issue, index) => (
+              <div
+                key={issue.reason}
+                className="group relative rounded-lg border bg-card p-3 transition-all hover:shadow-md hover:border-coral/30"
+              >
+                <div className="flex items-center gap-3">
+                  {/* Rank badge */}
+                  <div
+                    className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold shrink-0 ${getSeverityColor(index)}`}
+                  >
+                    {index + 1}
+                  </div>
+                  
+                  {/* Issue name */}
+                  <div className="flex-1 min-w-0">
+                    <span
+                      className="text-sm font-medium block truncate"
+                      title={issue.reason}
+                    >
                       {issue.reason}
                     </span>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <div className="text-right">
-                      <span className="text-xs text-muted-foreground block">Count</span>
-                      <span className="text-sm font-medium">{issue.count}</span>
+                  
+                  {/* Metrics */}
+                  <div className="flex items-center gap-6 shrink-0">
+                    <div className="w-12 text-center">
+                      <span className="text-sm font-semibold">{issue.count}</span>
                     </div>
-                    <div className="text-right">
-                      <span className="text-xs text-muted-foreground block">Share</span>
-                      <span className="rounded-full bg-coral/10 px-2 py-0.5 text-xs font-semibold text-coral">
+                    <div className="w-14 text-center">
+                      <span className="inline-flex items-center justify-center rounded-full bg-coral/10 px-2.5 py-1 text-xs font-bold text-coral">
                         {issue.percentage}%
                       </span>
                     </div>
                   </div>
                 </div>
-                <div className="h-2 w-full rounded-full bg-secondary overflow-hidden">
+                
+                {/* Progress bar */}
+                <div className="mt-2 h-1.5 w-full rounded-full bg-secondary overflow-hidden">
                   <div
                     className="h-full rounded-full transition-all duration-500"
                     style={{
                       width: `${(issue.count / maxCount) * 100}%`,
-                      background: `linear-gradient(90deg, #FF4B4B ${100 - issue.percentage}%, #ff7b7b 100%)`,
+                      background: `linear-gradient(90deg, hsl(var(--coral)) 0%, hsl(var(--coral) / 0.6) 100%)`,
                     }}
                   />
                 </div>
               </div>
-            ))
-          )}
-        </div>
+            ))}
+          </div>
+        )}
       </CardContent>
     </Card>
   );

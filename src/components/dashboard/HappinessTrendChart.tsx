@@ -17,8 +17,9 @@ import {
   ResponsiveContainer,
   ReferenceLine,
 } from "recharts";
-import { CallRecord, calculateNHS, getClinicLocations } from "@/data/medcareData";
+import { CallRecord, calculateNHS, getFilteredClinicLocations } from "@/data/medcareData";
 import { format } from "date-fns";
+import { TrendingUp, TrendingDown } from "lucide-react";
 
 interface HappinessTrendChartProps {
   data: CallRecord[];
@@ -28,16 +29,31 @@ interface HappinessTrendChartProps {
 export function HappinessTrendChart({ data, selectedLocation }: HappinessTrendChartProps) {
   const [localFilter, setLocalFilter] = useState<string>("all");
 
-  const clinicLocations = useMemo(() => getClinicLocations(data), [data]);
+  const clinicLocations = useMemo(() => getFilteredClinicLocations(data), [data]);
 
-  // Compute clinic-wise averages for tooltip when in default mode
-  const clinicAverages = useMemo(() => {
-    const averages: Record<string, number> = {};
+  // Compute clinic-wise NHS for each day
+  const clinicDailyNHS = useMemo(() => {
+    const result: Record<string, Record<string, number>> = {};
+    
     clinicLocations.forEach((loc) => {
       const locRecords = data.filter((r) => r.Clinic_Location === loc);
-      averages[loc] = calculateNHS(locRecords);
+      const dateMap = new Map<string, CallRecord[]>();
+      
+      locRecords.forEach((record) => {
+        const dateKey = format(record.Date, "yyyy-MM-dd");
+        if (!dateMap.has(dateKey)) {
+          dateMap.set(dateKey, []);
+        }
+        dateMap.get(dateKey)!.push(record);
+      });
+      
+      result[loc] = {};
+      dateMap.forEach((records, date) => {
+        result[loc][date] = calculateNHS(records);
+      });
     });
-    return averages;
+    
+    return result;
   }, [data, clinicLocations]);
 
   const chartData = useMemo(() => {
@@ -75,42 +91,72 @@ export function HappinessTrendChart({ data, selectedLocation }: HappinessTrendCh
 
   const activeFilterLabel = selectedLocation || (localFilter !== "all" ? localFilter : null);
 
-  // Custom tooltip showing clinic averages when in default mode
+  // Custom tooltip showing best/worst performer based on dip/spike
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (!active || !payload?.length) return null;
 
     const value = payload[0].value;
-    const showClinicBreakdown = !selectedLocation && localFilter === "all";
+    const currentDate = payload[0].payload.date;
+    const showClinicInsight = !selectedLocation && localFilter === "all";
+    
+    // Determine if this is a dip or spike
+    const isDip = value < averageNHS;
+    
+    // Get clinic performances for this date
+    let bestClinic = { name: "", nhs: 0 };
+    let worstClinic = { name: "", nhs: 100 };
+    
+    if (showClinicInsight) {
+      clinicLocations.forEach((clinic) => {
+        const clinicNHS = clinicDailyNHS[clinic]?.[currentDate];
+        if (clinicNHS !== undefined) {
+          if (clinicNHS > bestClinic.nhs) {
+            bestClinic = { name: clinic, nhs: clinicNHS };
+          }
+          if (clinicNHS < worstClinic.nhs) {
+            worstClinic = { name: clinic, nhs: clinicNHS };
+          }
+        }
+      });
+    }
 
     return (
-      <div
-        className="rounded-lg border bg-card p-3 shadow-lg"
-        style={{ maxWidth: 280 }}
-      >
-        <p className="font-semibold text-foreground mb-2">Date: {label}</p>
-        <p className="text-sm">
-          Net Happiness Score: <span className="font-bold">{value}%</span>
-        </p>
-        {showClinicBreakdown && (
-          <div className="mt-3 pt-2 border-t">
-            <p className="text-xs text-muted-foreground mb-2">Clinic Avg NHS:</p>
-            <div className="space-y-1 max-h-32 overflow-y-auto">
-              {Object.entries(clinicAverages)
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, 8)
-                .map(([clinic, avg]) => (
-                  <div key={clinic} className="flex justify-between text-xs">
-                    <span className="truncate max-w-[150px]">{clinic}</span>
-                    <span
-                      className={`font-medium ${
-                        avg >= averageNHS ? "text-teal" : "text-coral"
-                      }`}
-                    >
-                      {avg}%
-                    </span>
-                  </div>
-                ))}
-            </div>
+      <div className="rounded-lg border bg-card p-3 shadow-lg min-w-[200px]">
+        <p className="font-semibold text-foreground mb-2">{label}</p>
+        <div className="flex items-center gap-2 mb-3">
+          <span className="text-sm text-muted-foreground">NHS:</span>
+          <span className={`text-lg font-bold ${isDip ? "text-coral" : "text-teal"}`}>
+            {value}%
+          </span>
+          {isDip ? (
+            <TrendingDown className="h-4 w-4 text-coral" />
+          ) : (
+            <TrendingUp className="h-4 w-4 text-teal" />
+          )}
+        </div>
+        
+        {showClinicInsight && (
+          <div className="pt-2 border-t space-y-2">
+            {isDip && worstClinic.name && (
+              <div className="flex items-start gap-2">
+                <div className="h-2 w-2 rounded-full bg-coral mt-1.5 shrink-0" />
+                <div className="text-xs">
+                  <span className="text-muted-foreground">Lowest: </span>
+                  <span className="font-medium text-coral">{worstClinic.name}</span>
+                  <span className="text-coral font-bold ml-1">({worstClinic.nhs}%)</span>
+                </div>
+              </div>
+            )}
+            {!isDip && bestClinic.name && (
+              <div className="flex items-start gap-2">
+                <div className="h-2 w-2 rounded-full bg-teal mt-1.5 shrink-0" />
+                <div className="text-xs">
+                  <span className="text-muted-foreground">Top: </span>
+                  <span className="font-medium text-teal">{bestClinic.name}</span>
+                  <span className="text-teal font-bold ml-1">({bestClinic.nhs}%)</span>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
