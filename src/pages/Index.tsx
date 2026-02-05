@@ -82,7 +82,7 @@ const Index = () => {
 
 
         {/* Row 1: Happiness Trend + Top Issues */}
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
           <div className="lg:col-span-3">
             <HappinessTrendChart 
               data={validRecords} 
