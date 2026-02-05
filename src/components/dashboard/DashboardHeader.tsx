@@ -69,27 +69,12 @@ export function DashboardHeader({ selectedLocation, onClearFilter }: DashboardHe
 
             <div className="h-8 w-px bg-border" />
 
-            {/* Revenue at Risk */}
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1 text-coral">
-                <AlertTriangle className="h-4 w-4" />
-              </div>
-              <div className="text-right">
-                <p className="text-xs text-muted-foreground">Revenue at Risk</p>
-                <p className="text-lg font-bold text-coral">
-                  AED {metrics.revenueAtRisk.toLocaleString()}
-                </p>
-              </div>
-            </div>
-
-            <div className="h-8 w-px bg-border" />
-
-            {/* High Churn Cases */}
+            {/* Brand Aversion Cases */}
             <div className="flex items-center gap-2">
               <Badge variant="destructive" className="rounded-full px-2 py-1">
                 {metrics.highChurnCount}
               </Badge>
-              <span className="text-sm text-muted-foreground">High Churn</span>
+              <span className="text-sm text-muted-foreground">Brand Aversion</span>
             </div>
 
             {/* Filter Indicator */}

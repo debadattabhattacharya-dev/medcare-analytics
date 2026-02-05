@@ -67,10 +67,10 @@ export function ClinicalStarMap({ data, selectedLocation }: ClinicalStarMapProps
       <CardHeader className="pb-2">
         <div className="flex items-center gap-2">
           <Stethoscope className="h-5 w-5 text-teal" />
-          <CardTitle className="text-lg font-semibold">Clinical Star Map</CardTitle>
+          <CardTitle className="text-lg font-semibold">Doctor CSAT Performance</CardTitle>
         </div>
         <p className="text-sm text-muted-foreground">
-          Doctor performance: Size = NPS • Color = CSAT rating
+          Doctor satisfaction: Size = NPS • Color = CSAT rating
           {selectedLocation && ` • ${selectedLocation}`}
         </p>
       </CardHeader>

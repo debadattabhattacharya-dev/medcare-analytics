@@ -24,8 +24,6 @@ export function WarRoomTriage({ data, selectedLocation }: WarRoomTriageProps) {
       }));
   }, [data, selectedLocation]);
 
-  const totalRevenueAtRisk = highChurnCases.length * 50000;
-
   return (
     <Card className="shadow-healthcare border-coral/20">
       <CardHeader className="pb-2 bg-coral/5 rounded-t-lg">
@@ -39,7 +37,7 @@ export function WarRoomTriage({ data, selectedLocation }: WarRoomTriageProps) {
           </Badge>
         </div>
         <p className="text-sm text-muted-foreground">
-          High churn risk cases requiring immediate attention
+          Brand aversion cases requiring immediate attention
           {selectedLocation && ` • ${selectedLocation}`}
         </p>
       </CardHeader>
@@ -83,23 +81,15 @@ export function WarRoomTriage({ data, selectedLocation }: WarRoomTriageProps) {
                     </div>
                   </div>
                   <Badge variant="destructive" className="shrink-0">
-                    High Churn
+                    Brand Aversion
                   </Badge>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 mb-3">
-                  <div className="rounded-md bg-background p-2">
-                    <p className="text-xs text-muted-foreground">Primary Issue</p>
-                    <p className="text-sm font-medium text-coral">
-                      {caseData.Unhappy_Reason !== "N/A" ? caseData.Unhappy_Reason : caseData.Churn_Reason}
-                    </p>
-                  </div>
-                  <div className="rounded-md bg-background p-2">
-                    <p className="text-xs text-muted-foreground">Revenue at Risk</p>
-                    <p className="text-sm font-bold text-coral">
-                      AED {caseData.revenueAtRisk.toLocaleString()}
-                    </p>
-                  </div>
+                <div className="rounded-md bg-background p-2 mb-3">
+                  <p className="text-xs text-muted-foreground">Primary Issue</p>
+                  <p className="text-sm font-medium text-coral">
+                    {caseData.Unhappy_Reason !== "N/A" ? caseData.Unhappy_Reason : caseData.Churn_Reason}
+                  </p>
                 </div>
 
                 <div className="rounded-md bg-teal-light p-3">
@@ -113,15 +103,6 @@ export function WarRoomTriage({ data, selectedLocation }: WarRoomTriageProps) {
                 </div>
               </div>
             ))}
-
-            <div className="mt-4 pt-4 border-t flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">
-                Total Revenue at Risk from High Churn Cases:
-              </span>
-              <span className="text-xl font-bold text-coral">
-                AED {totalRevenueAtRisk.toLocaleString()}
-              </span>
-            </div>
           </div>
         )}
       </CardContent>

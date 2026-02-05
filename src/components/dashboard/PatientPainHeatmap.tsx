@@ -32,11 +32,18 @@ export function PatientPainHeatmap({
     const locations = allLocations.filter((loc) => !excludedClinics.includes(loc));
     const concerns = getConcernCategories(data);
 
+    // First, calculate total calls per location for proper percentage calculation
+    const locationTotals: Record<string, number> = {};
+    locations.forEach((loc) => {
+      locationTotals[loc] = data.filter((r) => r.Clinic_Location === loc).length;
+    });
+
     // Create heatmap matrix
     const matrix: Record<string, Record<string, { unhappy: number; total: number; percentage: number }>> = {};
 
     locations.forEach((loc) => {
       matrix[loc] = {};
+      const locationTotal = locationTotals[loc];
       concerns.forEach((concern) => {
         const cellRecords = data.filter(
           (r) => r.Clinic_Location === loc && r.Primary_Concern_Category === concern
@@ -47,10 +54,11 @@ export function PatientPainHeatmap({
             r.Emotional_Shift?.includes("to Neg") ||
             r.Trust_Confidence_Indicator === "Absent"
         );
+        // Percentage is now: unhappy calls with this concern / total calls for this clinic
         matrix[loc][concern] = {
           unhappy: unhappyRecords.length,
           total: cellRecords.length,
-          percentage: cellRecords.length > 0 ? Math.round((unhappyRecords.length / cellRecords.length) * 100) : 0,
+          percentage: locationTotal > 0 ? Math.round((unhappyRecords.length / locationTotal) * 100) : 0,
         };
       });
     });
@@ -70,9 +78,9 @@ export function PatientPainHeatmap({
   return (
     <Card className="shadow-healthcare">
       <CardHeader className="pb-2">
-        <CardTitle className="text-lg font-semibold">Patient Pain Heatmap</CardTitle>
+        <CardTitle className="text-lg font-semibold">Patient Dissatisfaction with the Brand</CardTitle>
         <p className="text-sm text-muted-foreground">
-          Click a clinic to filter dashboard • % of unhappy calls per cell
+          Click a clinic to filter dashboard • % of dissatisfied calls per concern
         </p>
       </CardHeader>
       <CardContent>

@@ -468,20 +468,29 @@ export const getConcernCategories = (records: CallRecord[]) => {
   return Array.from(categories).sort();
 };
 
+// Normalize doctor names (remove slashes, keep first name only)
+const normalizeDoctorName = (name: string): string => {
+  if (name.includes("/")) {
+    return name.split("/")[0].trim();
+  }
+  return name;
+};
+
 // Get doctor performance data
 export const getDoctorPerformance = (records: CallRecord[]) => {
   const doctorMap = new Map<string, { mentions: number; totalCSAT: number; totalNPS: number; count: number }>();
   
   records.forEach((r) => {
     if (r.Doctor_Name && r.Doctor_Name !== "N/A" && r.Doctor_Name.startsWith("Dr.")) {
-      const existing = doctorMap.get(r.Doctor_Name) || { mentions: 0, totalCSAT: 0, totalNPS: 0, count: 0 };
+      const normalizedName = normalizeDoctorName(r.Doctor_Name);
+      const existing = doctorMap.get(normalizedName) || { mentions: 0, totalCSAT: 0, totalNPS: 0, count: 0 };
       existing.mentions += 1;
       if (r.Doctor_CSAT > 0) {
         existing.totalCSAT += r.Doctor_CSAT;
         existing.totalNPS += r.NPS_Score_10;
         existing.count += 1;
       }
-      doctorMap.set(r.Doctor_Name, existing);
+      doctorMap.set(normalizedName, existing);
     }
   });
   
@@ -493,12 +502,37 @@ export const getDoctorPerformance = (records: CallRecord[]) => {
   }));
 };
 
+// Reasons to exclude (meaningless or diagnostic issues)
+const excludedReasons = [
+  "Ring didn't fall",
+  "Automated calls",
+  "Automated",
+  "Epidural failure",
+  "Stomach problem",
+  "Pain Management",
+  "Health status",
+];
+
+// Reasons to merge (similar meanings)
+const mergeReasons: Record<string, string> = {
+  "6 day delays": "Delay",
+  "Delay": "Delay",
+};
+
 export const getTopUnhappyReasons = (records: CallRecord[]) => {
   const reasonMap = new Map<string, number>();
   
   records.forEach(r => {
     if (r.Unhappy_Reason && r.Unhappy_Reason !== "N/A") {
-      reasonMap.set(r.Unhappy_Reason, (reasonMap.get(r.Unhappy_Reason) || 0) + 1);
+      let reason = r.Unhappy_Reason;
+      
+      // Skip excluded reasons
+      if (excludedReasons.some(ex => reason.toLowerCase().includes(ex.toLowerCase()))) return;
+      
+      // Merge similar reasons
+      reason = mergeReasons[reason] || reason;
+      
+      reasonMap.set(reason, (reasonMap.get(reason) || 0) + 1);
     }
   });
   
@@ -541,6 +575,9 @@ export const getPersonaSentiment = (records: CallRecord[]) => {
   }));
 };
 
+// Competitors to exclude (not real competitors)
+const excludedCompetitors = ["Bangkok", "Rethink Prov.", "South America"];
+
 // Get competitor mentions
 export const getCompetitorMentions = (records: CallRecord[]) => {
   const competitorMap = new Map<string, number>();
@@ -556,6 +593,9 @@ export const getCompetitorMentions = (records: CallRecord[]) => {
       if (name.includes("King's")) name = "King's College";
       if (name.includes("Dubai Hospital")) name = "Dubai Hospital";
       if (name.includes("Other")) name = "Other Hospitals";
+      
+      // Exclude non-competitor names
+      if (excludedCompetitors.includes(name)) return;
       
       competitorMap.set(name, (competitorMap.get(name) || 0) + 1);
     }
@@ -607,7 +647,8 @@ export const getCompetitorMentionDetails = (records: CallRecord[]) => {
         reason: r.Competitor_Reason && r.Competitor_Reason !== "N/A" ? r.Competitor_Reason : "Not specified",
         impact,
       };
-    });
+    })
+    .filter((r) => !excludedCompetitors.includes(r.competitor));
 };
 
 // Get vibe analysis
