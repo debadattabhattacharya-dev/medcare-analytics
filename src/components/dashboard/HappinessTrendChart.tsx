@@ -1,5 +1,12 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   AreaChart,
   Area,
@@ -10,7 +17,7 @@ import {
   ResponsiveContainer,
   ReferenceLine,
 } from "recharts";
-import { CallRecord, calculateNHS } from "@/data/medcareData";
+import { CallRecord, calculateNHS, getClinicLocations } from "@/data/medcareData";
 import { format } from "date-fns";
 
 interface HappinessTrendChartProps {
@@ -19,10 +26,25 @@ interface HappinessTrendChartProps {
 }
 
 export function HappinessTrendChart({ data, selectedLocation }: HappinessTrendChartProps) {
+  const [localFilter, setLocalFilter] = useState<string>("all");
+
+  const clinicLocations = useMemo(() => getClinicLocations(data), [data]);
+
+  // Compute clinic-wise averages for tooltip when in default mode
+  const clinicAverages = useMemo(() => {
+    const averages: Record<string, number> = {};
+    clinicLocations.forEach((loc) => {
+      const locRecords = data.filter((r) => r.Clinic_Location === loc);
+      averages[loc] = calculateNHS(locRecords);
+    });
+    return averages;
+  }, [data, clinicLocations]);
+
   const chartData = useMemo(() => {
-    // Filter by location if selected
-    const filteredData = selectedLocation
-      ? data.filter((r) => r.Clinic_Location === selectedLocation)
+    // Apply local filter or external selectedLocation
+    const activeFilter = selectedLocation || (localFilter !== "all" ? localFilter : null);
+    const filteredData = activeFilter
+      ? data.filter((r) => r.Clinic_Location === activeFilter)
       : data;
 
     // Group by date
@@ -44,33 +66,95 @@ export function HappinessTrendChart({ data, selectedLocation }: HappinessTrendCh
         calls: records.length,
       }))
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-  }, [data, selectedLocation]);
+  }, [data, selectedLocation, localFilter]);
 
   const averageNHS = useMemo(() => {
     if (chartData.length === 0) return 0;
     return Math.round(chartData.reduce((acc, d) => acc + d.nhs, 0) / chartData.length);
   }, [chartData]);
 
+  const activeFilterLabel = selectedLocation || (localFilter !== "all" ? localFilter : null);
+
+  // Custom tooltip showing clinic averages when in default mode
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (!active || !payload?.length) return null;
+
+    const value = payload[0].value;
+    const showClinicBreakdown = !selectedLocation && localFilter === "all";
+
+    return (
+      <div
+        className="rounded-lg border bg-card p-3 shadow-lg"
+        style={{ maxWidth: 280 }}
+      >
+        <p className="font-semibold text-foreground mb-2">Date: {label}</p>
+        <p className="text-sm">
+          Net Happiness Score: <span className="font-bold">{value}%</span>
+        </p>
+        {showClinicBreakdown && (
+          <div className="mt-3 pt-2 border-t">
+            <p className="text-xs text-muted-foreground mb-2">Clinic Avg NHS:</p>
+            <div className="space-y-1 max-h-32 overflow-y-auto">
+              {Object.entries(clinicAverages)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 8)
+                .map(([clinic, avg]) => (
+                  <div key={clinic} className="flex justify-between text-xs">
+                    <span className="truncate max-w-[150px]">{clinic}</span>
+                    <span
+                      className={`font-medium ${
+                        avg >= averageNHS ? "text-teal" : "text-coral"
+                      }`}
+                    >
+                      {avg}%
+                    </span>
+                  </div>
+                ))}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <Card className="shadow-healthcare">
       <CardHeader className="pb-2">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-2">
           <CardTitle className="text-lg font-semibold">
-            Executive Happiness Velocity
-            {selectedLocation && (
+            Patient Happiness Trend
+            {activeFilterLabel && (
               <span className="ml-2 text-sm font-normal text-muted-foreground">
-                — {selectedLocation}
+                — {activeFilterLabel}
               </span>
             )}
           </CardTitle>
-          <div className="flex items-center gap-4 text-sm">
-            <div className="flex items-center gap-2">
-              <div className="h-3 w-3 rounded-full bg-teal" />
-              <span className="text-muted-foreground">Growth</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="h-3 w-3 rounded-full bg-coral" />
-              <span className="text-muted-foreground">Dips</span>
+          <div className="flex items-center gap-4">
+            {/* Clinic filter dropdown */}
+            {!selectedLocation && (
+              <Select value={localFilter} onValueChange={setLocalFilter}>
+                <SelectTrigger className="w-[180px] h-8 text-sm">
+                  <SelectValue placeholder="All Clinics" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Clinics</SelectItem>
+                  {clinicLocations.map((loc) => (
+                    <SelectItem key={loc} value={loc}>
+                      {loc}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+            <div className="flex items-center gap-4 text-sm">
+              <div className="flex items-center gap-2">
+                <div className="h-3 w-3 rounded-full bg-teal" />
+                <span className="text-muted-foreground">Growth</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="h-3 w-3 rounded-full bg-coral" />
+                <span className="text-muted-foreground">Dips</span>
+              </div>
             </div>
           </div>
         </div>
@@ -98,23 +182,14 @@ export function HappinessTrendChart({ data, selectedLocation }: HappinessTrendCh
                 dy={10}
               />
               <YAxis
-                domain={[0, 200]}
+                domain={[0, 100]}
                 axisLine={false}
                 tickLine={false}
                 tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
                 dx={-10}
                 tickFormatter={(value) => `${value}%`}
               />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "hsl(var(--card))",
-                  border: "1px solid hsl(var(--border))",
-                  borderRadius: "8px",
-                  boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                }}
-                formatter={(value: number) => [`${value}%`, "Net Happiness Score"]}
-                labelFormatter={(label) => `Date: ${label}`}
-              />
+              <Tooltip content={<CustomTooltip />} />
               <ReferenceLine
                 y={averageNHS}
                 stroke="hsl(var(--muted-foreground))"

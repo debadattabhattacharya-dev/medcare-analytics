@@ -66,9 +66,9 @@ const Index = () => {
             variant="coral"
           />
           <MetricCard
-            title="High Churn Risk"
+            title="Brand Aversion"
             value={highChurnCases.length}
-            subtitle={`AED ${(highChurnCases.length * 50000).toLocaleString()} at risk`}
+            subtitle="Patients at risk"
             icon={AlertTriangle}
             variant="warning"
           />
