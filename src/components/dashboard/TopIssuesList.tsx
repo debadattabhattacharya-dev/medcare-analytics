@@ -110,11 +110,13 @@ export function TopIssuesList({ data, selectedLocation, onFilterChange }: TopIss
                 </div>
                 
                 {/* Progress bar */}
-                <div className="h-1.5 w-full rounded-full bg-secondary overflow-hidden ml-9">
-                  <div
-                    className="h-full rounded-full bg-coral transition-all duration-500"
-                    style={{ width: `${(issue.count / maxCount) * 100}%` }}
-                  />
+                <div className="ml-9">
+                  <div className="h-1.5 w-[calc(100%-2.25rem)] rounded-full bg-secondary overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-coral transition-all duration-500"
+                      style={{ width: `${(issue.count / maxCount) * 100}%` }}
+                    />
+                  </div>
                 </div>
               </div>
             ))}
