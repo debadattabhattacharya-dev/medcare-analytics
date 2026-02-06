@@ -171,7 +171,7 @@ export function HappinessTrendChart({ data, selectedLocation, onFilterChange }: 
   };
 
   return (
-    <Card className="shadow-healthcare flex-1 flex flex-col">
+    <Card className="shadow-healthcare h-full flex flex-col">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <CardTitle className="text-lg font-semibold">
