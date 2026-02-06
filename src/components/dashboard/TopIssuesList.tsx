@@ -49,7 +49,7 @@ export function TopIssuesList({ data, selectedLocation, onFilterChange }: TopIss
   };
 
   return (
-    <Card className="shadow-healthcare flex-1 flex flex-col">
+    <Card className="shadow-healthcare">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
@@ -77,64 +77,43 @@ export function TopIssuesList({ data, selectedLocation, onFilterChange }: TopIss
           <p className="text-xs text-muted-foreground mt-1">Filtered: {activeFilterLabel}</p>
         )}
       </CardHeader>
-      <CardContent className="pt-0 flex-1">
+      <CardContent className="pt-0">
         {issues.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
             <TrendingDown className="h-8 w-8 mb-2 opacity-50" />
             <p className="text-sm">No issues found for this filter</p>
           </div>
         ) : (
-          <div className="space-y-3">
-            {/* Header row */}
-            <div className="flex items-center justify-end gap-6 text-xs text-muted-foreground px-1 pb-1 border-b">
-              <span className="w-12 text-center">Count</span>
-              <span className="w-14 text-center">Share</span>
-            </div>
-            
+          <div className="space-y-4">
             {issues.map((issue, index) => (
-              <div
-                key={issue.reason}
-                className="group relative rounded-lg border bg-card p-3 transition-all hover:shadow-md hover:border-coral/30"
-              >
+              <div key={issue.reason} className="space-y-1.5">
                 <div className="flex items-center gap-3">
                   {/* Rank badge */}
                   <div
-                    className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold shrink-0 ${getSeverityColor(index)}`}
+                    className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold shrink-0 ${getSeverityColor(index)}`}
                   >
                     {index + 1}
                   </div>
                   
                   {/* Issue name */}
-                  <div className="flex-1 min-w-0">
-                    <span
-                      className="text-sm font-medium block truncate"
-                      title={issue.reason}
-                    >
-                      {issue.reason}
-                    </span>
-                  </div>
+                  <span className="text-sm font-medium flex-1 truncate" title={issue.reason}>
+                    {issue.reason}
+                  </span>
                   
-                  {/* Metrics */}
-                  <div className="flex items-center gap-6 shrink-0">
-                    <div className="w-12 text-center">
-                      <span className="text-sm font-semibold">{issue.count}</span>
-                    </div>
-                    <div className="w-14 text-center">
-                      <span className="inline-flex items-center justify-center rounded-full bg-coral/10 px-2.5 py-1 text-xs font-bold text-coral">
-                        {issue.percentage}%
-                      </span>
-                    </div>
-                  </div>
+                  {/* Count */}
+                  <span className="text-sm font-semibold w-8 text-right">{issue.count}</span>
+                  
+                  {/* Percentage badge */}
+                  <span className="inline-flex items-center justify-center rounded-full bg-coral/10 px-2 py-0.5 text-xs font-bold text-coral min-w-[40px]">
+                    {issue.percentage}%
+                  </span>
                 </div>
                 
                 {/* Progress bar */}
-                <div className="mt-2 h-1.5 w-full rounded-full bg-secondary overflow-hidden">
+                <div className="h-1.5 w-full rounded-full bg-secondary overflow-hidden ml-9">
                   <div
-                    className="h-full rounded-full transition-all duration-500"
-                    style={{
-                      width: `${(issue.count / maxCount) * 100}%`,
-                      background: `linear-gradient(90deg, hsl(var(--coral)) 0%, hsl(var(--coral) / 0.6) 100%)`,
-                    }}
+                    className="h-full rounded-full bg-coral transition-all duration-500"
+                    style={{ width: `${(issue.count / maxCount) * 100}%` }}
                   />
                 </div>
               </div>
