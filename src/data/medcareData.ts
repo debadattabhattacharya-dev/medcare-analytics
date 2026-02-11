@@ -410,9 +410,13 @@ const rawData = [
   { Call_ID: "MC234", Agent_Name: "Aisha Al-Hammadi", Duration: 66, Customer_Name: "Amna Bint Ahmed Al-Nahyan", Intent: "Follow-up", Vibe: "Frustrated", Sentiment: "Negative", Purpose: "Recovery Check", Patient_Advocate_Category: "N/A", Patient_Type: "Guardian", Visit_Type: "Admission", Primary_Concern_Category: "N/A", Emotional_Shift: "Neut to Neg", Trust_Confidence_Indicator: "N/A", Patient_Happy: "N/A", Happiness_Reason: "N/A", Patient_Unhappy: "No", Unhappy_Reason: "Audio issues", Doctor_Mention_Flag: "Yes", Doctor_Name: "Ibrahim", Doctor_CSAT: 0, Clinic_Location: "Sharjah Hospital", Positive_Service_Drivers: "N/A", Competitor_Mention_Flag: "No", Competitor_Name: "N/A", Competitor_Reason: "N/A", Churn_Threat: "Medium", Churn_Reason: "Process Gap", Retention_Propensity: "N/A", Insurance_Friction_Flag: "No", Patient_Satisfaction_Score_10: 0, NPS_Score_10: 0, Caregiver_Rating_5: 0, Patient_Satisfaction_Score: 0, AI_Recommendations: "Resolve phone audio quality to prevent broken follow-up calls." },
 ];
 
+// Append new-format records MC235-MC594
+const newRecords = EXCEL_ROWS_MC235_MC594.map((row) => parseNewFormatRow(row));
+const combinedRawData = [...rawData, ...newRecords];
+
 // Simulate 30-day timeline by mapping Call_ID index to dates
 const startDate = new Date("2026-01-03");
-const processedData: CallRecord[] = rawData.map((record, index) => {
+const processedData: CallRecord[] = combinedRawData.map((record, index) => {
   const dayOffset = index % 30;
   const date = new Date(startDate);
   date.setDate(startDate.getDate() + dayOffset);
