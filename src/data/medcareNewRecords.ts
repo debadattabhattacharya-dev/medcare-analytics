@@ -4,7 +4,7 @@
 const CLINIC_POOL = [
   "Al Safa", "Medcare Royal", "Sharjah Hospital", "Women & Children",
   "Ortho & Spine", "Medcare Hospital", "Al Barsha", "Mirdif City Centre",
-  "All Specialty", "Al Taawun", "Motor City",
+  "All Specialty", "Al Taawun",
 ];
 
 function assignClinic(callId: string): string {
