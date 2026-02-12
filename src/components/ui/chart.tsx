@@ -58,6 +58,27 @@ const ChartContainer = React.forwardRef<
 });
 ChartContainer.displayName = "Chart";
 
+/**
+ * Sanitizes a CSS color value to prevent injection attacks.
+ * Only allows valid hex, hsl(), hsla(), rgb(), rgba(), and named CSS color keywords.
+ */
+const sanitizeColor = (color: string): string => {
+  if (/^#[0-9A-Fa-f]{3,8}$/.test(color)) return color;
+  if (/^hsl\(\s*[\d.]+\s+[\d.]+%\s+[\d.]+%\s*\)$/.test(color)) return color;
+  if (/^hsla?\([^)]*\)$/.test(color) && !/[;{}]/.test(color)) return color;
+  if (/^rgba?\([^)]*\)$/.test(color) && !/[;{}]/.test(color)) return color;
+  if (/^[a-zA-Z]+$/.test(color)) return color;
+  // Reject anything that doesn't match known safe patterns
+  return "hsl(0 0% 0%)";
+};
+
+/**
+ * Sanitizes a CSS selector ID to prevent injection.
+ */
+const sanitizeChartId = (id: string): string => {
+  return id.replace(/[^a-zA-Z0-9_-]/g, "");
+};
+
 const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
   const colorConfig = Object.entries(config).filter(([_, config]) => config.theme || config.color);
 
@@ -65,17 +86,19 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
     return null;
   }
 
+  const safeId = sanitizeChartId(id);
+
   return (
     <style
       dangerouslySetInnerHTML={{
         __html: Object.entries(THEMES)
           .map(
             ([theme, prefix]) => `
-${prefix} [data-chart=${id}] {
+${prefix} [data-chart=${safeId}] {
 ${colorConfig
   .map(([key, itemConfig]) => {
     const color = itemConfig.theme?.[theme as keyof typeof itemConfig.theme] || itemConfig.color;
-    return color ? `  --color-${key}: ${color};` : null;
+    return color ? `  --color-${key}: ${sanitizeColor(color)};` : null;
   })
   .join("\n")}
 }

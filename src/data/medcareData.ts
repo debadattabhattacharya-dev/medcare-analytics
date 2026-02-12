@@ -1,3 +1,14 @@
+/**
+ * ⚠️ DISCLAIMER: SIMULATED DATA ONLY
+ * All patient names, doctor names, call records, and healthcare interactions
+ * in this file are entirely fictitious and generated for demonstration purposes.
+ * This data does NOT contain real Protected Health Information (PHI) or
+ * Personally Identifiable Information (PII).
+ *
+ * DO NOT use this pattern to store real patient data in client-side code.
+ * Production applications MUST fetch healthcare data from a secured backend
+ * with proper authentication, authorization, and audit logging.
+ */
 // Medcare VoC Analytics Dataset - Simulated with 30-day timeline
 import { EXCEL_ROWS_MC235_MC594, parseNewFormatRow } from "./medcareNewRecords";
 
