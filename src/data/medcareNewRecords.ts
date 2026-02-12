@@ -1,3 +1,11 @@
+/**
+ * ⚠️ DISCLAIMER: SIMULATED DATA ONLY
+ * All records in this file are entirely fictitious and generated for
+ * demonstration purposes. No real patient data or PHI/PII is included.
+ *
+ * DO NOT replicate this pattern with real healthcare data.
+ * Production systems MUST use a secured backend with proper access controls.
+ */
 // Extended Medcare VoC Dataset - Records MC235-MC594
 // New format has an extra "Contact Person" column at position 4
 
