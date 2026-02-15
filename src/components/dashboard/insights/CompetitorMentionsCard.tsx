@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { CallRecord, CompetitorImpact, getCompetitorMentionDetails, getCompetitorMentions } from "@/data/medcareData";
+import { CallRecord, CompetitorImpact, getCompetitorMentionDetails, getCompetitorMentions, getDisplayCompetitorName } from "@/data/medcareData";
 import { Pie, PieChart, Cell, ResponsiveContainer, Tooltip as RechartsTooltip } from "recharts";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -26,19 +26,19 @@ type DetailsRow = ReturnType<typeof getCompetitorMentionDetails>[number];
 const getImpactContext = (reason: string, impact: CompetitorImpact): string => {
   if (impact === "Good to Medcare") {
     if (reason.toLowerCase().includes("better service") || reason.toLowerCase().includes("wait time")) {
-      return "Patient chose Medcare over competitor due to better service/shorter wait times";
+      return "Patient chose us over competitor due to better service/shorter wait times";
     }
     if (reason.toLowerCase().includes("prior")) {
-      return "Patient had prior experience elsewhere but prefers Medcare now";
+      return "Patient had prior experience elsewhere but prefers us now";
     }
-    return "Positive comparison — patient favors Medcare";
+    return "Positive comparison — patient favors our hospital";
   }
   if (impact === "Bad to Medcare") {
     if (reason.toLowerCase().includes("better service")) {
-      return "Patient feels competitor offers better service than Medcare";
+      return "Patient feels competitor offers better service";
     }
     if (reason.toLowerCase().includes("process") || reason.toLowerCase().includes("gap")) {
-      return "Patient frustrated with Medcare processes, considering alternatives";
+      return "Patient frustrated with our processes, considering alternatives";
     }
     if (reason.toLowerCase().includes("quality")) {
       return "Patient perceives competitor as having higher quality care";
@@ -53,8 +53,8 @@ export function CompetitorMentionsCard({ data }: { data: CallRecord[] }) {
   const [impactFilter, setImpactFilter] = useState<"all" | CompetitorImpact>("all");
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  const competitorData = useMemo(() => getCompetitorMentions(data), [data]);
-  const details = useMemo(() => getCompetitorMentionDetails(data), [data]);
+  const competitorData = useMemo(() => getCompetitorMentions(data).map(c => ({ ...c, name: getDisplayCompetitorName(c.name) })), [data]);
+  const details = useMemo(() => getCompetitorMentionDetails(data).map(d => ({ ...d, competitor: getDisplayCompetitorName(d.competitor) })), [data]);
 
   const totalMentions = useMemo(() => 
     competitorData.reduce((sum, c) => sum + c.count, 0), 
@@ -270,8 +270,8 @@ export function CompetitorMentionsCard({ data }: { data: CallRecord[] }) {
                                       : "bg-yellow-100 text-yellow-700 border-yellow-200"
                                 }
                               >
-                                {r.impact === "Good to Medcare" ? "Good for Medcare" : 
-                                 r.impact === "Bad to Medcare" ? "Risk to Medcare" : "Neutral"}
+                                {r.impact === "Good to Medcare" ? "Favorable" : 
+                                 r.impact === "Bad to Medcare" ? "Risk" : "Neutral"}
                               </Badge>
                             </TableCell>
                           </TableRow>

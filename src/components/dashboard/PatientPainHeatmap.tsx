@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CallRecord, getFilteredClinicLocations, getConcernCategories } from "@/data/medcareData";
+import { CallRecord, getFilteredClinicLocations, getConcernCategories, getDisplayClinicName } from "@/data/medcareData";
 import { cn } from "@/lib/utils";
 
 interface PatientPainHeatmapProps {
@@ -103,8 +103,8 @@ export function PatientPainHeatmap({
                   }
                 >
                   <td className="text-sm font-medium p-2 max-w-[140px]">
-                    <span className="block truncate" title={location}>
-                      {location}
+                    <span className="block truncate" title={getDisplayClinicName(location)}>
+                      {getDisplayClinicName(location)}
                     </span>
                   </td>
                   {concerns.map((concern) => {
