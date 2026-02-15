@@ -26,40 +26,227 @@ export const EXCLUDED_CLINICS = [
   "Sharjah Branch 1",
 ];
 
-// Display mapping: original clinic names → Indian hospital names
+// Parent Hospital: Apollo Hospitals — all clinics are Apollo branches
 const CLINIC_DISPLAY_MAP: Record<string, string> = {
-  "Al Safa": "Apollo Delhi - Sarita Vihar",
-  "Medcare Royal": "Fortis Gurugram",
-  "Sharjah Hospital": "Max Saket",
-  "Women & Children": "AIIMS Delhi - W&C Wing",
-  "Ortho & Spine": "Medanta Gurugram - Ortho",
-  "Medcare Hospital": "Apollo Indraprastha",
-  "Al Barsha": "Fortis Vasant Kunj",
-  "Mirdif City Centre": "BLK-Max Delhi",
-  "All Specialty": "Sir Ganga Ram Hospital",
-  "Al Taawun": "Narayana Health Bangalore",
-  "Mother City Center": "Kokilaben Mumbai",
-  "Motor City": "Lilavati Mumbai",
+  "Al Safa": "Apollo Clinic - Sarita Vihar",
+  "Medcare Royal": "Apollo Clinic - Gurugram",
+  "Sharjah Hospital": "Apollo Clinic - Noida",
+  "Women & Children": "Apollo W&C - Indraprastha",
+  "Ortho & Spine": "Apollo Ortho & Spine - Delhi",
+  "Medcare Hospital": "Apollo Hospital - Indraprastha",
+  "Al Barsha": "Apollo Clinic - Vasant Kunj",
+  "Mirdif City Centre": "Apollo Clinic - Dwarka",
+  "All Specialty": "Apollo Spectra - Delhi",
+  "Medcare All Speciality": "Apollo Spectra - Delhi",
+  "Al Taawun": "Apollo Clinic - Bangalore",
+  "Mother City Center": "Apollo Clinic - Hyderabad",
+  "Motor City": "Apollo Clinic - Chennai",
 };
 
-// Display mapping: original competitor names → Indian hospital names
+// Display mapping: competitor names → Indian hospital names
 const COMPETITOR_DISPLAY_MAP: Record<string, string> = {
   "Aster": "Manipal Hospitals",
   "NMC": "Columbia Asia",
   "Saudi German": "Narayana Health",
   "Mediclinic": "Hinduja Hospital",
-  "King's College": "Breach Candy Hospital",
-  "Dubai Hospital": "Safdarjung Hospital",
+  "King's College": "Fortis Healthcare",
+  "Dubai Hospital": "Max Healthcare",
   "Other Hospitals": "Other Hospitals",
+  "Rethink Prov.": "Medanta",
+  "CPH": "AIIMS",
 };
 
-/** Map an original clinic name to Indian display name */
+// Display mapping: customer names → Indian names (for UI display)
+const CUSTOMER_DISPLAY_MAP: Record<string, string> = {
+  "Ahmed Bin Hamad Al-Mansouri": "Rajesh Kumar",
+  "Fatima Bint Sultan Al-Nahyan": "Priya Sharma",
+  "Khalid Bin Majid Al-Farsi": "Amit Patel",
+  "Noor Bint Yousef Al-Hammadi": "Neha Gupta",
+  "Rashid Bin Salem Al-Mazrouei": "Vikram Singh",
+  "Reem Bint Ali Al-Suwaidi": "Anjali Desai",
+  "Faisal Bin Hassan Al-Qassimi": "Suresh Reddy",
+  "Sultan Bin Nasser Al-Kaabi": "Deepak Verma",
+  "Mona Bint Tariq Al-Shamsi": "Kavita Iyer",
+  "Yousef Bin Khalfan Al-Mansouri": "Rahul Mehta",
+  "Yara Bint Abdullah Al-Maktoum": "Sneha Joshi",
+  "Ali Bin Fahad Al-Nahyan": "Arjun Nair",
+  "Amna Bint Ahmed Al-Farsi": "Meera Krishnan",
+  "Zayed Bin Omar Al-Hammadi": "Sanjay Tiwari",
+  "Hind Bint Khalid Al-Mazrouei": "Pooja Agarwal",
+  "Tariq Bin Mohammed Al-Shamsi": "Manish Chauhan",
+  "Yasmin Bint Rashid Al-Suwaidi": "Ritu Saxena",
+  "Abdullah Bin Saif Al-Qassimi": "Arun Bhatia",
+  "Noura Bint Faisal Al-Maktoum": "Divya Menon",
+  "Huda Bint Zayed Al-Balushi": "Sunita Rao",
+  "Rashid Bin Salem Al-Hammadi": "Karan Malhotra",
+  "Reem Bint Ali Al-Mazrouei": "Swati Pandey",
+  "Faisal Bin Hassan Al-Suwaidi": "Nikhil Jain",
+  "Sultan Bin Nasser Al-Balushi": "Gaurav Mishra",
+  "Mona Bint Tariq Al-Kaabi": "Aarti Kulkarni",
+  "Ahmed Bin Hamad Al-Suwaidi": "Rohit Choudhary",
+  "Fatima Bint Sultan Al-Qassimi": "Lakshmi Nambiar",
+  "Khalid Bin Majid Al-Balushi": "Vivek Sinha",
+  "Noor Bint Yousef Al-Kaabi": "Geeta Pillai",
+  "Rashid Bin Salem Al-Shamsi": "Harsh Vardhan",
+  "Reem Bint Ali Al-Mansouri": "Anita Deshpande",
+  "Faisal Bin Hassan Al-Maktoum": "Prakash Hegde",
+  "Huda Bint Zayed Al-Qassimi": "Rekha Bhatt",
+  "Sultan Bin Nasser Al-Maktoum": "Dinesh Kapoor",
+  "Mona Bint Tariq Al-Nahyan": "Shobha Rao",
+  "Yousef Bin Khalfan Al-Farsi": "Anil Dubey",
+  "Yara Bint Abdullah Al-Hammadi": "Nandini Shetty",
+  "Ali Bin Fahad Al-Mazrouei": "Manoj Pillai",
+  "Amna Bint Ahmed Al-Suwaidi": "Pallavi Jha",
+  "Zayed Bin Omar Al-Qassimi": "Sachin Gupta",
+  "Hind Bint Khalid Al-Balushi": "Megha Thakur",
+  "Tariq Bin Mohammed Al-Kaabi": "Vinod Yadav",
+  "Yasmin Bint Rashid Al-Maktoum": "Usha Menon",
+  "Abdullah Bin Saif Al-Nahyan": "Ashok Banerjee",
+  "Noura Bint Faisal Al-Farsi": "Smita Gokhale",
+  "Ahmed Bin Hamad Al-Hammadi": "Manoj Kumar",
+  "Fatima Bint Sultan Al-Mazrouei": "Jaya Srinivasan",
+  "Khalid Bin Majid Al-Suwaidi": "Pankaj Sharma",
+  "Noor Bint Yousef Al-Qassimi": "Nisha Agarwal",
+  "Rashid Bin Salem Al-Balushi": "Sunil Patil",
+  "Tariq Bin Mohammed Al-Nahyan": "Ravi Shankar",
+  "Reem Bint Ali Al-Kaabi": "Aparna Nair",
+  "Noura Bint Faisal Al-Mazrouei": "Tanvi Deshmukh",
+  "Yousef Bin Khalfan Al-Maktoum": "Ramesh Iyer",
+  "Yara Bint Abdullah Al-Suwaidi": "Prachi Kale",
+  "Ali Bin Fahad Al-Qassimi": "Nitin Joshi",
+  "Amna Bint Ahmed Al-Balushi": "Shalini Mishra",
+  "Zayed Bin Omar Al-Kaabi": "Ajay Khanna",
+  "Hind Bint Khalid Al-Shamsi": "Bhavna Chawla",
+  "Tariq Bin Mohammed Al-Mansouri": "Raghav Soni",
+  "Yasmin Bint Rashid Al-Shamsi": "Kriti Arora",
+  "Abdullah Bin Saif Al-Mansouri": "Tarun Bose",
+  // "Noura Bint Faisal Al-Maktoum" already mapped above
+  "Ahmed Bin Hamad Al-Nahyan": "Girish Kulkarni",
+  "Fatima Bint Sultan Al-Farsi": "Chitra Venkatesh",
+  "Khalid Bin Majid Al-Hammadi": "Sameer Dutta",
+  "Noor Bint Yousef Al-Mazrouei": "Komal Pandey",
+  "Rashid Bin Salem Al-Suwaidi": "Devendra Thakkar",
+  "Reem Bint Ali Al-Qassimi": "Anupama Sethi",
+  "Faisal Bin Hassan Al-Balushi": "Tushar Grover",
+  "Huda Bint Zayed Al-Kaabi": "Padma Iyengar",
+  "Sultan Bin Nasser Al-Shamsi": "Omprakash Shukla",
+  "Mona Bint Tariq Al-Mansouri": "Hemlata Rathi",
+  "Yousef Bin Khalfan Al-Shamsi": "Jagdish Tiwari",
+  "Yara Bint Abdullah Al-Mansouri": "Seema Kapoor",
+  "Ali Bin Fahad Al-Maktoum": "Anand Lal",
+  "Amna Bint Ahmed Al-Nahyan": "Rukmini Das",
+  "Zayed Bin Omar Al-Farsi": "Hemant Patil",
+  "Hind Bint Khalid Al-Mansouri": "Jyoti Mathur",
+  "Tariq Bin Mohammed Al-Qassimi": "Siddharth Mohan",
+  "Yasmin Bint Rashid Al-Balushi": "Deepika Soni",
+  "Abdullah Bin Saif Al-Kaabi": "Prasad Menon",
+  "Noura Bint Faisal Al-Shamsi": "Bharti Sethi",
+  "Ahmed Bin Hamad Al-Mazrouei": "Rakesh Tandon",
+  "Fatima Bint Sultan Al-Hammadi": "Sudha Rani",
+  "Khalid Bin Majid Al-Mazrouei": "Vikas Agnihotri",
+  "Noor Bint Yousef Al-Shamsi": "Gayatri Prabhu",
+  "Rashid Bin Salem Al-Mansouri": "Umesh Chandra",
+  "Reem Bint Ali Al-Shamsi": "Madhuri Bhat",
+  "Faisal Bin Hassan Al-Kaabi": "Sudhir Kapoor",
+  "Huda Bint Zayed Al-Shamsi": "Kamla Devi",
+  "Sultan Bin Nasser Al-Nahyan": "Brij Mohan",
+  "Mona Bint Tariq Al-Maktoum": "Hema Malini",
+  "Yousef Bin Khalfan Al-Nahyan": "Srinivas Rao",
+  "Noura Bint Faisal Al-Nahyan": "Vasundhara Patil",
+  "Ahmed Bin Hamad Al-Farsi": "Shyam Sundar",
+  "Fatima Bint Sultan Al-Balushi": "Urmila Deshpande",
+  "Khalid Bin Majid Al-Nahyan": "Vishal Kapoor",
+  "Noor Bint Yousef Al-Farsi": "Sangeeta Mehta",
+  "Rashid Bin Salem Al-Kaabi": "Tapan Ghosh",
+  "Reem Bint Ali Al-Balushi": "Chhaya Tripathi",
+  "Faisal Bin Hassan Al-Shamsi": "Lalit Mohan",
+  "Huda Bint Zayed Al-Mansouri": "Saroj Srivastava",
+  "Sultan Bin Nasser Al-Suwaidi": "Ajit Shenoy",
+  "Mona Bint Tariq Al-Farsi": "Parveen Bano",
+  "Yousef Bin Khalfan Al-Hammadi": "Mohan Lal",
+  "Yara Bint Abdullah Al-Mazrouei": "Ranjana Pandey",
+  "Ali Bin Fahad Al-Suwaidi": "Nilesh Shah",
+  "Amna Bint Ahmed Al-Kaabi": "Savita Kulkarni",
+  "Zayed Bin Omar Al-Shamsi": "Brijesh Yadav",
+  "Hind Bint Khalid Al-Kaabi": "Urvashi Saxena",
+  "Hind Bint Khalid Al-Nahyan": "Alka Joshi",
+  "Tariq Bin Mohammed Al-Farsi": "Kamlesh Patel",
+  "Yasmin Bint Rashid Al-Farsi": "Ritika Bhandari",
+  "Noura Bint Faisal Al-Suwaidi": "Manju Devi",
+  "Fatima Bint Sultan Al-Shamsi": "Kaveri Narayan",
+  "Noor Bint Yousef Al-Balushi": "Sunanda Roy",
+  "Rashid Bin Salem Al-Qassimi": "Ashwin Khatri",
+  "Reem Bint Ali Al-Maktoum": "Sharada Bhonsle",
+  "Faisal Bin Hassan Al-Mansouri": "Mahesh Trivedi",
+  "Huda Bint Zayed Al-Farsi": "Radha Krishnan",
+  "Sultan Bin Nasser Al-Hammadi": "Gopal Prasad",
+  "Mona Bint Tariq Al-Mazrouei": "Pushpa Devi",
+  "Yousef Bin Khalfan Al-Suwaidi": "Harish Chandra",
+  "Yara Bint Abdullah Al-Qassimi": "Sumitra Pande",
+  "Ali Bin Fahad Al-Balushi": "Naveen Jha",
+  "Amna Bint Ahmed Al-Mansouri": "Veena Sharma",
+  "Zayed Bin Omar Al-Balushi": "Bharat Kumar",
+  "Ali Bin Fahad Al-Farsi": "Dilip Saxena",
+  "Amna Bint Ahmed Al-Hammadi": "Mamta Tiwari",
+  "Zayed Bin Omar Al-Mazrouei": "Kishore Raman",
+  "Hind Bint Khalid Al-Suwaidi": "Vandana Singh",
+  "Amna Bint Ahmed Al-Qassimi": "Namrata Jain",
+  "Zayed Bin Omar Al-Nahyan": "Santosh Hegde",
+  "Ali Bin Fahad Al-Shamsi": "Lokesh Verma",
+  "Ali Bin Fahad Al-Hammadi": "Debashis Mukherjee",
+  "Noura Bint Faisal Al-Qassimi": "Archana Bajpai",
+  "Noura Bint Faisal Al-Balushi": "Kusum Lata",
+  "Noura Bint Faisal Al-Hammadi": "Sudeshna Roy",
+  "Ahmed Bin Hamad Al-Qassimi": "Pradeep Varma",
+  "Faisal Bin Hassan Al-Nahyan": "Nirmal Joshi",
+  "Fatima Bint Sultan Al-Suwaidi": "Aakriti Mishra",
+  "Fatima Bint Sultan Al-Maktoum": "Indira Shastri",
+  "Fatima Bint Sultan Al-Kaabi": "Bimla Devi",
+  "Khalid Bin Majid Al-Kaabi": "Prem Chand",
+  "Khalid Bin Majid Al-Shamsi": "Vivek Srivastava",
+  "Khalid Bin Majid Al-Mansouri": "Ashutosh Pandit",
+  "Khalid Bin Majid Al-Qassimi": "Jagmohan Singh",
+  "Mona Bint Tariq Al-Hammadi": "Sadhana Gupta",
+  "Mona Bint Tariq Al-Suwaidi": "Kamini Khanna",
+  "Noor Bint Yousef Al-Suwaidi": "Tara Bai",
+  "Noor Bint Yousef Al-Mansouri": "Rani Mishra",
+  "Noor Bint Yousef Al-Maktoum": "Vanita Desai",
+  "Sultan Bin Nasser Al-Farsi": "Bhupendra Chauhan",
+  "Sultan Bin Nasser Al-Mazrouei": "Trilok Chand",
+  "Sultan Bin Nasser Al-Qassimi": "Mukesh Ahluwalia",
+  "Reem Bint Ali Al-Nahyan": "Apeksha Dhawan",
+  "Reem Bint Ali Al-Farsi": "Damyanti Puri",
+  "Yasmin Bint Rashid Al-Hammadi": "Bindu Patel",
+  "Yasmin Bint Rashid Al-Nahyan": "Kalpana Devi",
+  "Yasmin Bint Rashid Al-Mansouri": "Vasanti Kamath",
+  "Yasmin Bint Rashid Al-Qassimi": "Nita Reddy",
+  "Abdullah Bin Saif Al-Farsi": "Rameshwar Dayal",
+  "Abdullah Bin Saif Al-Hammadi": "Navneet Arora",
+  "Abdullah Bin Saif Al-Maktoum": "Balwinder Singh",
+  "Ahmed Bin Hamad Al-Kaabi": "Chandrashekhar Rao",
+  "Tariq Bin Mohammed Al-Mazrouei": "Partha Sarathi",
+  "Tariq Bin Mohammed Al-Maktoum": "Raghunath Prasad",
+  "Tariq Bin Mohammed Al-Balushi": "Venkataraman Iyer",
+  "Yara Bint Abdullah Al-Nahyan": "Lalita Kumari",
+  // "Zayed Bin Omar Al-Qassimi" already mapped above
+  "Huda Bint Zayed Al-Nahyan": "Kamakshi Sundaram",
+  "Huda Bint Zayed Al-Maktoum": "Prabha Shankar",
+  "Yousef Bin Khalfan Al-Qassimi": "Ramnarayan Singh",
+  "Yousef Bin Khalfan Al-Balushi": "Murli Manohar",
+  "Yousef Bin Khalfan Al-Kaabi": "Satyanarayan Mishra",
+};
+
+/** Map an original clinic name to Apollo branch display name */
 export const getDisplayClinicName = (name: string): string =>
   CLINIC_DISPLAY_MAP[name] || name;
 
-/** Map an original competitor name to Indian display name */
+/** Map an original competitor name to Indian hospital display name */
 export const getDisplayCompetitorName = (name: string): string =>
   COMPETITOR_DISPLAY_MAP[name] || name;
+
+/** Map an original customer name to Indian display name */
+export const getDisplayCustomerName = (name: string): string =>
+  CUSTOMER_DISPLAY_MAP[name] || name;
 
 export interface CallRecord {
   Call_ID: string;
@@ -673,7 +860,7 @@ export const getPersonaSentiment = (records: CallRecord[]) => {
 };
 
 // Competitors to exclude (not real competitors)
-const excludedCompetitors = ["Bangkok", "Rethink Prov.", "South America"];
+const excludedCompetitors = ["Bangkok", "South America"];
 
 // Get competitor mentions
 export const getCompetitorMentions = (records: CallRecord[]) => {
@@ -684,12 +871,15 @@ export const getCompetitorMentions = (records: CallRecord[]) => {
       // Clean up competitor names
       let name = r.Competitor_Name;
       if (name.includes("Aster")) name = "Aster";
-      if (name.includes("NMC")) name = "NMC";
-      if (name.includes("Saudi German")) name = "Saudi German";
-      if (name.includes("Mediclinic")) name = "Mediclinic";
-      if (name.includes("King's")) name = "King's College";
-      if (name.includes("Dubai Hospital")) name = "Dubai Hospital";
-      if (name.includes("Other")) name = "Other Hospitals";
+      else if (name.includes("NMC")) name = "NMC";
+      else if (name.includes("Saudi German")) name = "Saudi German";
+      else if (name.includes("Mediclinic")) name = "Mediclinic";
+      else if (name.includes("King's")) name = "King's College";
+      else if (name.includes("Dubai Hospital")) name = "Dubai Hospital";
+      else if (name.includes("CPH")) name = "CPH";
+      else if (name.includes("Rethink")) name = "Rethink Prov.";
+      else if (name.includes("Other") || name.includes("Generic")) name = "Other Hospitals";
+      else if (!["Aster","NMC","Saudi German","Mediclinic","King's College","Dubai Hospital","CPH","Rethink Prov."].includes(name)) name = "Other Hospitals";
       
       // Exclude non-competitor names
       if (excludedCompetitors.includes(name)) return;
@@ -723,12 +913,15 @@ export const getCompetitorMentionDetails = (records: CallRecord[]) => {
       // Keep naming consistent with getCompetitorMentions
       let name = r.Competitor_Name;
       if (name.includes("Aster")) name = "Aster";
-      if (name.includes("NMC")) name = "NMC";
-      if (name.includes("Saudi German")) name = "Saudi German";
-      if (name.includes("Mediclinic")) name = "Mediclinic";
-      if (name.includes("King's")) name = "King's College";
-      if (name.includes("Dubai Hospital")) name = "Dubai Hospital";
-      if (name.includes("Other")) name = "Other Hospitals";
+      else if (name.includes("NMC")) name = "NMC";
+      else if (name.includes("Saudi German")) name = "Saudi German";
+      else if (name.includes("Mediclinic")) name = "Mediclinic";
+      else if (name.includes("King's")) name = "King's College";
+      else if (name.includes("Dubai Hospital")) name = "Dubai Hospital";
+      else if (name.includes("CPH")) name = "CPH";
+      else if (name.includes("Rethink")) name = "Rethink Prov.";
+      else if (name.includes("Other") || name.includes("Generic")) name = "Other Hospitals";
+      else if (!["Aster","NMC","Saudi German","Mediclinic","King's College","Dubai Hospital","CPH","Rethink Prov."].includes(name)) name = "Other Hospitals";
 
       let impact: CompetitorImpact = "Neutral";
       if (r.Churn_Threat === "High" || r.Sentiment === "Negative") impact = "Bad to Medcare";
