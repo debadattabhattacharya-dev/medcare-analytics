@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CallRecord, getHighChurnCases } from "@/data/medcareData";
+import { CallRecord, getHighChurnCases, getDisplayClinicName } from "@/data/medcareData";
 import { AlertCircle, Phone, MapPin, Clock, Lightbulb } from "lucide-react";
 import { format } from "date-fns";
 
@@ -38,7 +38,7 @@ export function WarRoomTriage({ data, selectedLocation }: WarRoomTriageProps) {
         </div>
         <p className="text-sm text-muted-foreground">
           Brand aversion cases requiring immediate attention
-          {selectedLocation && ` • ${selectedLocation}`}
+          {selectedLocation && ` • ${getDisplayClinicName(selectedLocation)}`}
         </p>
       </CardHeader>
       <CardContent className="pt-4">
@@ -71,7 +71,7 @@ export function WarRoomTriage({ data, selectedLocation }: WarRoomTriageProps) {
                         </span>
                         <span className="flex items-center gap-1">
                           <MapPin className="h-3 w-3" />
-                          {caseData.Clinic_Location || "N/A"}
+                          {getDisplayClinicName(caseData.Clinic_Location) || "N/A"}
                         </span>
                         <span className="flex items-center gap-1">
                           <Clock className="h-3 w-3" />

@@ -26,6 +26,41 @@ export const EXCLUDED_CLINICS = [
   "Sharjah Branch 1",
 ];
 
+// Display mapping: original clinic names → Indian hospital names
+const CLINIC_DISPLAY_MAP: Record<string, string> = {
+  "Al Safa": "Apollo Delhi - Sarita Vihar",
+  "Medcare Royal": "Fortis Gurugram",
+  "Sharjah Hospital": "Max Saket",
+  "Women & Children": "AIIMS Delhi - W&C Wing",
+  "Ortho & Spine": "Medanta Gurugram - Ortho",
+  "Medcare Hospital": "Apollo Indraprastha",
+  "Al Barsha": "Fortis Vasant Kunj",
+  "Mirdif City Centre": "BLK-Max Delhi",
+  "All Specialty": "Sir Ganga Ram Hospital",
+  "Al Taawun": "Narayana Health Bangalore",
+  "Mother City Center": "Kokilaben Mumbai",
+  "Motor City": "Lilavati Mumbai",
+};
+
+// Display mapping: original competitor names → Indian hospital names
+const COMPETITOR_DISPLAY_MAP: Record<string, string> = {
+  "Aster": "Manipal Hospitals",
+  "NMC": "Columbia Asia",
+  "Saudi German": "Narayana Health",
+  "Mediclinic": "Hinduja Hospital",
+  "King's College": "Breach Candy Hospital",
+  "Dubai Hospital": "Safdarjung Hospital",
+  "Other Hospitals": "Other Hospitals",
+};
+
+/** Map an original clinic name to Indian display name */
+export const getDisplayClinicName = (name: string): string =>
+  CLINIC_DISPLAY_MAP[name] || name;
+
+/** Map an original competitor name to Indian display name */
+export const getDisplayCompetitorName = (name: string): string =>
+  COMPETITOR_DISPLAY_MAP[name] || name;
+
 export interface CallRecord {
   Call_ID: string;
   Agent_Name: string;
