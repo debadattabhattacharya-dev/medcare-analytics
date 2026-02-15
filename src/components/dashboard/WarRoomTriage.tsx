@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CallRecord, getHighChurnCases, getDisplayClinicName } from "@/data/medcareData";
+import { CallRecord, getHighChurnCases, getDisplayClinicName, getDisplayCustomerName } from "@/data/medcareData";
 import { AlertCircle, Phone, MapPin, Clock, Lightbulb } from "lucide-react";
 import { format } from "date-fns";
 
@@ -30,7 +30,7 @@ export function WarRoomTriage({ data, selectedLocation }: WarRoomTriageProps) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <AlertCircle className="h-5 w-5 text-coral animate-pulse-soft" />
-            <CardTitle className="text-lg font-semibold">War Room Triage Center</CardTitle>
+            <CardTitle className="text-lg font-semibold">Brand Aversion Center</CardTitle>
           </div>
           <Badge variant="destructive" className="text-sm">
             {highChurnCases.length} Critical Cases
@@ -63,7 +63,7 @@ export function WarRoomTriage({ data, selectedLocation }: WarRoomTriageProps) {
                       {index + 1}
                     </div>
                     <div>
-                      <p className="font-semibold text-foreground">{caseData.Customer_Name}</p>
+                      <p className="font-semibold text-foreground">{getDisplayCustomerName(caseData.Customer_Name)}</p>
                       <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
                         <span className="flex items-center gap-1">
                           <Phone className="h-3 w-3" />

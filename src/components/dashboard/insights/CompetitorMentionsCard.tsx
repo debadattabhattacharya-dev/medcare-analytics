@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { CallRecord, CompetitorImpact, getCompetitorMentionDetails, getCompetitorMentions, getDisplayCompetitorName } from "@/data/medcareData";
+import { CallRecord, CompetitorImpact, getCompetitorMentionDetails, getCompetitorMentions, getDisplayCompetitorName, getDisplayCustomerName } from "@/data/medcareData";
 import { Pie, PieChart, Cell, ResponsiveContainer, Tooltip as RechartsTooltip } from "recharts";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -26,12 +26,12 @@ type DetailsRow = ReturnType<typeof getCompetitorMentionDetails>[number];
 const getImpactContext = (reason: string, impact: CompetitorImpact): string => {
   if (impact === "Good to Medcare") {
     if (reason.toLowerCase().includes("better service") || reason.toLowerCase().includes("wait time")) {
-      return "Patient chose us over competitor due to better service/shorter wait times";
+      return "Patient chose Apollo over competitor due to better service/shorter wait times";
     }
     if (reason.toLowerCase().includes("prior")) {
-      return "Patient had prior experience elsewhere but prefers us now";
+      return "Patient had prior experience elsewhere but prefers Apollo now";
     }
-    return "Positive comparison — patient favors our hospital";
+    return "Positive comparison — patient favors Apollo Hospitals";
   }
   if (impact === "Bad to Medcare") {
     if (reason.toLowerCase().includes("better service")) {
@@ -251,7 +251,7 @@ export function CompetitorMentionsCard({ data }: { data: CallRecord[] }) {
                       ) : (
                         selectedRows.slice(0, 30).map((r: DetailsRow) => (
                           <TableRow key={`${r.Call_ID}-${r.Customer_Name}`} className="align-top">
-                            <TableCell className="font-medium text-foreground">{r.Customer_Name}</TableCell>
+                            <TableCell className="font-medium text-foreground">{getDisplayCustomerName(r.Customer_Name)}</TableCell>
                             <TableCell className="font-mono text-xs text-foreground">{r.Call_ID}</TableCell>
                             <TableCell className="text-sm">
                               <div className="text-foreground font-medium">{r.reason}</div>
