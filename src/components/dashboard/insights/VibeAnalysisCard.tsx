@@ -60,7 +60,7 @@ export function VibeAnalysisCard({
   // Custom label line (pointer)
   const renderLabelLine = (props: any) => {
     const { cx, cy, midAngle, outerRadius, payload } = props;
-    if (payload.percentage < 10) return null;
+    if (payload.percentage < 15) return null;
     
     const RADIAN = Math.PI / 180;
     const startRadius = outerRadius + 4;
