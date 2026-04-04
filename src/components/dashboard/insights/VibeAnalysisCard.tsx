@@ -115,7 +115,7 @@ export function VibeAnalysisCard({
           <div className="relative h-[360px] w-full overflow-visible">
             <TooltipProvider>
               <ResponsiveContainer width="100%" height="100%">
-                <PieChart margin={{ top: 30, right: 70, bottom: 30, left: 70 }}>
+                <PieChart margin={{ top: 30, right: 80, bottom: 30, left: 80 }}>
                   <Pie
                     data={data}
                     dataKey="count"
