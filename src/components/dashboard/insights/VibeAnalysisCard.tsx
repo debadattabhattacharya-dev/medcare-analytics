@@ -38,7 +38,7 @@ export function VibeAnalysisCard({
     const x = cx + radius * Math.cos(-midAngle * RADIAN);
     const y = cy + radius * Math.sin(-midAngle * RADIAN);
 
-    if (percentage < 6) return null; // Hide small segments to avoid clipping
+    if (percentage < 15) return null;
 
     // Truncate long names
     const displayName = vibe.length > 8 ? vibe.substring(0, 7) + '.' : vibe;
@@ -60,7 +60,7 @@ export function VibeAnalysisCard({
   // Custom label line (pointer)
   const renderLabelLine = (props: any) => {
     const { cx, cy, midAngle, outerRadius, payload } = props;
-    if (payload.percentage < 6) return null;
+    if (payload.percentage < 15) return null;
     
     const RADIAN = Math.PI / 180;
     const startRadius = outerRadius + 4;
@@ -104,19 +104,21 @@ export function VibeAnalysisCard({
       <CardContent>
         <div className="flex flex-col items-center">
           {/* Donut chart with total in center */}
-          <div className="relative h-[240px] w-full">
+          <div className="relative h-[280px] w-full">
             <TooltipProvider>
               <ResponsiveContainer width="100%" height="100%">
-                <PieChart margin={{ top: 10, right: 10, bottom: 10, left: 10 }}>
+                <PieChart margin={{ top: 20, right: 70, bottom: 20, left: 70 }}>
                   <Pie
                     data={data}
                     dataKey="count"
                     nameKey="vibe"
                     cx="50%"
                     cy="50%"
-                    innerRadius={55}
-                    outerRadius={85}
+                    innerRadius={42}
+                    outerRadius={68}
                     paddingAngle={2}
+                    label={renderCustomLabel}
+                    labelLine={renderLabelLine}
                     style={{ cursor: "pointer" }}
                     onClick={(entry: any) => onPickVibe(entry?.vibe)}
                   >
@@ -151,7 +153,7 @@ export function VibeAnalysisCard({
             {/* Center total - moved outside TooltipProvider and given lower z-index */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
               <div className="text-center">
-                <div className="text-xl font-bold text-foreground">Total: {totalCalls}</div>
+                <div className="text-base font-bold text-foreground">Total: {totalCalls}</div>
               </div>
             </div>
           </div>
