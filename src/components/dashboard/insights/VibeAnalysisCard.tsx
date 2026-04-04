@@ -101,10 +101,10 @@ export function VibeAnalysisCard({
       <CardContent>
         <div className="flex flex-col items-center">
           {/* Donut chart with total in center */}
-          <div className="relative h-[320px] w-full">
+          <div className="relative h-[320px] w-full overflow-visible">
             <TooltipProvider>
               <ResponsiveContainer width="100%" height="100%">
-                <PieChart margin={{ top: 30, right: 60, bottom: 30, left: 60 }}>
+                <PieChart margin={{ top: 30, right: 80, bottom: 30, left: 80 }}>
                   <Pie
                     data={data}
                     dataKey="count"
