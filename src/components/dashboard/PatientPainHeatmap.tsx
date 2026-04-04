@@ -50,10 +50,14 @@ export function PatientPainHeatmap({
       });
     });
 
-    // Filter out concerns with zero dissatisfaction across all locations
-    const activeConcerns = concerns.filter((concern) =>
-      locations.some((loc) => matrix[loc][concern].unhappy > 0)
-    );
+    // Filter out concerns with zero dissatisfaction, then sort descending by total unhappy
+    const activeConcerns = concerns
+      .filter((concern) => locations.some((loc) => matrix[loc][concern].unhappy > 0))
+      .sort((a, b) => {
+        const totalA = locations.reduce((sum, loc) => sum + matrix[loc][a].unhappy, 0);
+        const totalB = locations.reduce((sum, loc) => sum + matrix[loc][b].unhappy, 0);
+        return totalB - totalA;
+      });
 
     // Filter out locations with zero dissatisfaction, then sort by total unhappy descending
     const activeLocations = locations
