@@ -50,7 +50,17 @@ export function PatientPainHeatmap({
       });
     });
 
-    return { heatmapData: matrix, locations, concerns };
+    // Filter out concerns with zero dissatisfaction across all locations
+    const activeConcerns = concerns.filter((concern) =>
+      locations.some((loc) => matrix[loc][concern].unhappy > 0)
+    );
+
+    // Filter out locations with zero dissatisfaction across all concerns
+    const activeLocations = locations.filter((loc) =>
+      concerns.some((concern) => matrix[loc][concern].unhappy > 0)
+    );
+
+    return { heatmapData: matrix, locations: activeLocations, concerns: activeConcerns };
   }, [data]);
 
   const getHeatColor = (percentage: number, total: number) => {
