@@ -366,6 +366,17 @@ export const getVibeAnalysis = (records: CallRecord[]) => {
     }));
 };
 
+// Get concern categories for heatmap
+export const getConcernCategories = (records: CallRecord[]): string[] => {
+  const categories = new Set<string>();
+  records.forEach((r) => {
+    if (r.Primary_Concern_Category && r.Primary_Concern_Category !== "N/A" && r.Primary_Concern_Category !== "Not Applicable") {
+      categories.add(r.Primary_Concern_Category);
+    }
+  });
+  return Array.from(categories).sort();
+};
+
 export const getTrustIndicator = (records: CallRecord[]) => {
   const usable = records.filter((r) => r.Trust_Confidence_Indicator && r.Trust_Confidence_Indicator !== "N/A");
   const present = usable.filter((r) => r.Trust_Confidence_Indicator === "Present").length;
