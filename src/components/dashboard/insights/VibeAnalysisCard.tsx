@@ -34,11 +34,14 @@ export function VibeAnalysisCard({
   // Custom label with pointer lines (like reference design)
   const renderCustomLabel = ({ vibe, percentage, cx, cy, midAngle, outerRadius }: any) => {
     const RADIAN = Math.PI / 180;
-    const radius = outerRadius + 24;
+    const radius = outerRadius + 20;
     const x = cx + radius * Math.cos(-midAngle * RADIAN);
     const y = cy + radius * Math.sin(-midAngle * RADIAN);
 
-    if (percentage < 5) return null; // Hide very small segments
+    if (percentage < 6) return null; // Hide small segments to avoid clipping
+
+    // Truncate long names
+    const displayName = vibe.length > 8 ? vibe.substring(0, 7) + '.' : vibe;
 
     return (
       <text
@@ -47,9 +50,9 @@ export function VibeAnalysisCard({
         fill="hsl(var(--foreground))"
         textAnchor={x > cx ? "start" : "end"}
         dominantBaseline="central"
-        style={{ fontSize: 11, fontWeight: 500 }}
+        style={{ fontSize: 10, fontWeight: 500 }}
       >
-        {vibe}: {percentage}%
+        {displayName}: {percentage}%
       </text>
     );
   };
