@@ -179,23 +179,45 @@ export const getDoctorPerformance = (records: CallRecord[]) => {
     });
 };
 
-// Reasons to exclude (meaningless or diagnostic issues)
-const excludedReasons = [
-  "Ring didn't fall",
-  "Automated calls",
-  "Automated",
-  "Epidural failure",
-  "Stomach problem",
-  "Pain Management",
-  "Health status",
-];
+// Categorize verbose unhappy reasons into clean pain point labels
+const categorizePainPoint = (reason: string): string | null => {
+  const r = reason.toLowerCase();
+  
+  // Skip non-reasons
+  if (
+    r === "no" || r === "yes" || r === "n/a" ||
+    r.includes("not applicable") ||
+    r.includes("no dissatisfaction") ||
+    r.includes("no unhappiness") ||
+    r.includes("did not express") ||
+    r.includes("not unhappy") ||
+    r.includes("customer expressed no") ||
+    r.includes("is only applicable") ||
+    r.includes("no reason for unhappiness") ||
+    (r.includes("kpi") && (r.includes("not applicable") || r.includes("'no'") || r.includes("is no") || r.includes("was no") || r.includes("marked as no")))
+  ) return null;
 
-// Reasons to merge (similar meanings)
-const mergeReasons: Record<string, string> = {
-  "6 day delays": "Delay",
-  "Delay": "Delay",
-  "6-day delay": "Delay",
-  "6 day delay": "Delay",
+  // Categorize by keywords (order matters - more specific first)
+  if (r.includes("delay") || r.includes("waiting") || r.includes("wait time") || r.includes("long wait") || r.includes("took time")) return "Long Wait Times & Delays";
+  if (r.includes("billing") || r.includes("bill") || r.includes("charge") || r.includes("cost") || r.includes("payment") || r.includes("price")) return "Billing & Cost Issues";
+  if (r.includes("insurance") || r.includes("approval")) return "Insurance & Approval Friction";
+  if (r.includes("nurse") || r.includes("staff") || r.includes("caregiver") || r.includes("rude") || r.includes("behavior") || r.includes("attitude")) return "Staff Behavior & Attitude";
+  if (r.includes("parking") || r.includes("wheelchair") || r.includes("facility") || r.includes("housekeeping") || r.includes("cleanliness")) return "Facility & Parking Issues";
+  if (r.includes("appointment") || r.includes("cancel") || r.includes("reschedul") || r.includes("scheduling")) return "Appointment & Scheduling";
+  if (r.includes("report") || r.includes("documentation") || r.includes("lab") || r.includes("result") || r.includes("sick leave") || r.includes("document")) return "Reports & Documentation Delays";
+  if (r.includes("discharge") || r.includes("coordination") || r.includes("handoff") || r.includes("process")) return "Process & Coordination Gaps";
+  if (r.includes("communication") || r.includes("callback") || r.includes("response") || r.includes("follow up") || r.includes("follow-up")) return "Poor Communication & Follow-up";
+  if (r.includes("room") || r.includes("food") || r.includes("dinner") || r.includes("kitchen") || r.includes("bed")) return "Room & Hospitality";
+  if (r.includes("medication") || r.includes("medicine") || r.includes("prescription")) return "Medication Issues";
+  if (r.includes("doctor") || r.includes("treatment") || r.includes("recovery") || r.includes("not improving") || r.includes("care journey")) return "Treatment & Care Outcome";
+  
+  // If it's a verbose paragraph but doesn't match, try to catch generic dissatisfaction
+  if (r.includes("unhapp") || r.includes("dissatisf") || r.includes("frustr")) return "General Dissatisfaction";
+  
+  // Skip if it's just noise
+  if (r.length < 5) return null;
+  
+  return "Other Issues";
 };
 
 export const getTopUnhappyReasons = (records: CallRecord[]) => {
@@ -203,15 +225,10 @@ export const getTopUnhappyReasons = (records: CallRecord[]) => {
   
   records.forEach(r => {
     if (r.Unhappy_Reason && r.Unhappy_Reason !== "N/A") {
-      let reason = r.Unhappy_Reason;
-      
-      // Skip excluded reasons
-      if (excludedReasons.some(ex => reason.toLowerCase().includes(ex.toLowerCase()))) return;
-      
-      // Merge similar reasons
-      reason = mergeReasons[reason] || reason;
-      
-      reasonMap.set(reason, (reasonMap.get(reason) || 0) + 1);
+      const category = categorizePainPoint(r.Unhappy_Reason);
+      if (category) {
+        reasonMap.set(category, (reasonMap.get(category) || 0) + 1);
+      }
     }
   });
   
@@ -219,11 +236,11 @@ export const getTopUnhappyReasons = (records: CallRecord[]) => {
   
   return Array.from(reasonMap.entries())
     .sort((a, b) => b[1] - a[1])
-    .slice(0, 5)
+    .slice(0, 7)
     .map(([reason, count]) => ({
       reason,
       count,
-      percentage: Math.round((count / total) * 100),
+      percentage: total > 0 ? Math.round((count / total) * 100) : 0,
     }));
 };
 
