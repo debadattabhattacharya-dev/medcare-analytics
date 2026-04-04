@@ -118,7 +118,7 @@ const Index = () => {
         {/* Footer */}
         <footer className="text-center py-6 border-t text-sm text-muted-foreground">
           <p>
-            Healthcare VoC Analytics Dashboard • 751 Records • Data simulated across 30-day timeline •
+            Medcare VoC Analytics Dashboard • Data simulated across 30-day timeline •
             Built for Executive Decision Making
           </p>
         </footer>

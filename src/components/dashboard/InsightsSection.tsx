@@ -6,7 +6,6 @@ import {
   CallRecord,
   getPersonaSentiment,
   getVibeAnalysis,
-  getDisplayClinicName,
 } from "@/data/medcareData";
 
 interface InsightsSectionProps {
@@ -30,7 +29,7 @@ export function InsightsSection({ data, selectedLocation }: InsightsSectionProps
         Deep Insights Analysis
         {selectedLocation && (
           <span className="ml-2 text-sm font-normal text-muted-foreground">
-            — {getDisplayClinicName(selectedLocation)}
+            — {selectedLocation}
           </span>
         )}
       </h2>

@@ -17,7 +17,7 @@ import {
   ResponsiveContainer,
   ReferenceLine,
 } from "recharts";
-import { CallRecord, calculateNHS, getFilteredClinicLocations, getDisplayClinicName } from "@/data/medcareData";
+import { CallRecord, calculateNHS, getFilteredClinicLocations } from "@/data/medcareData";
 import { format } from "date-fns";
 import { TrendingUp, TrendingDown } from "lucide-react";
 
@@ -149,7 +149,7 @@ export function HappinessTrendChart({ data, selectedLocation, onFilterChange }: 
                 <div className="h-2 w-2 rounded-full bg-coral mt-1.5 shrink-0" />
                 <div className="text-xs">
                   <span className="text-muted-foreground">Lowest: </span>
-                  <span className="font-medium text-coral">{getDisplayClinicName(worstClinic.name)}</span>
+                  <span className="font-medium text-coral">{worstClinic.name}</span>
                   <span className="text-coral font-bold ml-1">({worstClinic.nhs}%)</span>
                 </div>
               </div>
@@ -159,7 +159,7 @@ export function HappinessTrendChart({ data, selectedLocation, onFilterChange }: 
                 <div className="h-2 w-2 rounded-full bg-teal mt-1.5 shrink-0" />
                 <div className="text-xs">
                   <span className="text-muted-foreground">Top: </span>
-                  <span className="font-medium text-teal">{getDisplayClinicName(bestClinic.name)}</span>
+                  <span className="font-medium text-teal">{bestClinic.name}</span>
                   <span className="text-teal font-bold ml-1">({bestClinic.nhs}%)</span>
                 </div>
               </div>
@@ -178,7 +178,7 @@ export function HappinessTrendChart({ data, selectedLocation, onFilterChange }: 
             Patient Happiness Trend
             {activeFilterLabel && (
               <span className="ml-2 text-sm font-normal text-muted-foreground">
-                — {getDisplayClinicName(activeFilterLabel)}
+                — {activeFilterLabel}
               </span>
             )}
           </CardTitle>
@@ -191,8 +191,8 @@ export function HappinessTrendChart({ data, selectedLocation, onFilterChange }: 
               <SelectContent>
                 <SelectItem value="all">All Clinics</SelectItem>
                 {clinicLocations.map((loc) => (
-                <SelectItem key={loc} value={loc}>
-                    {getDisplayClinicName(loc)}
+                  <SelectItem key={loc} value={loc}>
+                    {loc}
                   </SelectItem>
                 ))}
               </SelectContent>

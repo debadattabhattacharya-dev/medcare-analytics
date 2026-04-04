@@ -6,7 +6,6 @@ import {
   validRecords,
   calculateNHS,
   getHighChurnCases,
-  getDisplayClinicName,
 } from "@/data/medcareData";
 import { MedcareLogo } from "./MedcareLogo";
 import { AlertTriangle, TrendingUp, RefreshCw } from "lucide-react";
@@ -44,10 +43,10 @@ export function DashboardHeader({ selectedLocation, onClearFilter }: DashboardHe
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           {/* Branding */}
           <div className="flex items-center gap-3">
-            <MedcareLogo className="h-10 w-auto" />
+            <MedcareLogo className="h-12 w-14" />
             <div>
               <h1 className="text-xl font-bold tracking-tight">
-                Healthcare <span className="text-teal">VoC Analytics</span>
+                Medcare <span className="text-teal">VoC Analytics</span>
               </h1>
               <p className="text-sm text-muted-foreground">
                 CXO Executive Dashboard
@@ -84,7 +83,7 @@ export function DashboardHeader({ selectedLocation, onClearFilter }: DashboardHe
                 <div className="h-8 w-px bg-border" />
                 <div className="flex items-center gap-2">
                   <Badge variant="secondary" className="bg-teal-light text-teal">
-                    {getDisplayClinicName(selectedLocation)}
+                    {selectedLocation}
                   </Badge>
                   <Button
                     variant="ghost"

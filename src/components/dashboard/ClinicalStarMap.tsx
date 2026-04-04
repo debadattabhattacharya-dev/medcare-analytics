@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CallRecord, getDoctorPerformance, getDisplayClinicName } from "@/data/medcareData";
+import { CallRecord, getDoctorPerformance } from "@/data/medcareData";
 import { Stethoscope, Star, TrendingUp, TrendingDown, Minus } from "lucide-react";
 
 interface ClinicalStarMapProps {
@@ -62,7 +62,7 @@ export function ClinicalStarMap({ data, selectedLocation }: ClinicalStarMapProps
             <CardTitle className="text-lg font-semibold">Doctor CSAT Performance</CardTitle>
             <p className="text-sm text-muted-foreground mt-0.5">
               Patient satisfaction ratings
-              {selectedLocation && ` • ${getDisplayClinicName(selectedLocation)}`}
+              {selectedLocation && ` • ${selectedLocation}`}
             </p>
           </div>
         </div>

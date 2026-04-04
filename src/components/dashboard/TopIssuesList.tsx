@@ -7,7 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CallRecord, getTopUnhappyReasons, getFilteredClinicLocations, getDisplayClinicName } from "@/data/medcareData";
+import { CallRecord, getTopUnhappyReasons, getFilteredClinicLocations } from "@/data/medcareData";
 import { AlertTriangle, TrendingDown } from "lucide-react";
 
 interface TopIssuesListProps {
@@ -67,14 +67,14 @@ export function TopIssuesList({ data, selectedLocation, onFilterChange }: TopIss
               <SelectItem value="all">All Clinics</SelectItem>
               {clinicLocations.map((loc) => (
                 <SelectItem key={loc} value={loc}>
-                  {getDisplayClinicName(loc)}
+                  {loc}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
         {activeFilterLabel && (
-          <p className="text-xs text-muted-foreground mt-1">Filtered: {getDisplayClinicName(activeFilterLabel!)}</p>
+          <p className="text-xs text-muted-foreground mt-1">Filtered: {activeFilterLabel}</p>
         )}
       </CardHeader>
       <CardContent className="pt-0 flex-1">
