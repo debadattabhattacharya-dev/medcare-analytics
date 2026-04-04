@@ -55,10 +55,14 @@ export function PatientPainHeatmap({
       locations.some((loc) => matrix[loc][concern].unhappy > 0)
     );
 
-    // Filter out locations with zero dissatisfaction across all concerns
-    const activeLocations = locations.filter((loc) =>
-      concerns.some((concern) => matrix[loc][concern].unhappy > 0)
-    );
+    // Filter out locations with zero dissatisfaction, then sort by total unhappy descending
+    const activeLocations = locations
+      .filter((loc) => concerns.some((concern) => matrix[loc][concern].unhappy > 0))
+      .sort((a, b) => {
+        const totalA = concerns.reduce((sum, c) => sum + matrix[a][c].unhappy, 0);
+        const totalB = concerns.reduce((sum, c) => sum + matrix[b][c].unhappy, 0);
+        return totalB - totalA;
+      });
 
     return { heatmapData: matrix, locations: activeLocations, concerns: activeConcerns };
   }, [data]);
