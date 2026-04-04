@@ -114,8 +114,8 @@ export function VibeAnalysisCard({
                     nameKey="vibe"
                     cx="50%"
                     cy="50%"
-                    innerRadius={45}
-                    outerRadius={72}
+                    innerRadius={38}
+                    outerRadius={62}
                     paddingAngle={2}
                     label={renderCustomLabel}
                     labelLine={renderLabelLine}
