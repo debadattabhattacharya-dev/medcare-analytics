@@ -42,14 +42,15 @@ export function VibeAnalysisCard({
 
     // Shorten name to fit
     const shortNames: Record<string, string> = {
-      Professional: "Profes.",
-      Appreciative: "Apprec.",
-      Cooperative: "Cooper.",
-      Reassuring: "Reassu.",
-      "Follow-up": "Follow.",
-      Feedback: "Feedbk.",
+      Professional: "Prof.",
+      Appreciative: "Appr.",
+      Cooperative: "Coop.",
+      Reassuring: "Reas.",
+      "Follow-up": "F.up",
+      Feedback: "Fdbk.",
+      Positive: "Pos.",
     };
-    const displayName = shortNames[vibe] || (vibe.length > 7 ? vibe.substring(0, 6) + "." : vibe);
+    const displayName = shortNames[vibe] || (vibe.length > 6 ? vibe.substring(0, 5) + "." : vibe);
 
     return (
       <text
