@@ -31,17 +31,25 @@ export function VibeAnalysisCard({
     setDialogOpen(true);
   };
 
-  // Custom label with pointer lines (like reference design)
+  // Custom label with pointer lines
   const renderCustomLabel = ({ vibe, percentage, cx, cy, midAngle, outerRadius }: any) => {
     const RADIAN = Math.PI / 180;
-    const radius = outerRadius + 20;
+    const radius = outerRadius + 22;
     const x = cx + radius * Math.cos(-midAngle * RADIAN);
     const y = cy + radius * Math.sin(-midAngle * RADIAN);
 
-    if (percentage < 15) return null;
+    if (percentage < 5) return null;
 
-    // Truncate long names
-    const displayName = vibe.length > 8 ? vibe.substring(0, 7) + '.' : vibe;
+    // Shorten name to fit
+    const shortNames: Record<string, string> = {
+      Professional: "Profes.",
+      Appreciative: "Apprec.",
+      Cooperative: "Cooper.",
+      Reassuring: "Reassu.",
+      "Follow-up": "Follow.",
+      Feedback: "Feedbk.",
+    };
+    const displayName = shortNames[vibe] || (vibe.length > 7 ? vibe.substring(0, 6) + "." : vibe);
 
     return (
       <text
@@ -60,7 +68,7 @@ export function VibeAnalysisCard({
   // Custom label line (pointer)
   const renderLabelLine = (props: any) => {
     const { cx, cy, midAngle, outerRadius, payload } = props;
-    if (payload.percentage < 15) return null;
+    if (payload.percentage < 5) return null;
     
     const RADIAN = Math.PI / 180;
     const startRadius = outerRadius + 4;
@@ -97,25 +105,25 @@ export function VibeAnalysisCard({
   };
 
   return (
-    <Card className="shadow-healthcare h-full">
+    <Card className="shadow-healthcare h-full overflow-visible">
       <CardHeader className="pb-2">
         <CardTitle className="text-base font-semibold">How Did The Call Feel?</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="overflow-visible">
         <div className="flex flex-col items-center">
           {/* Donut chart with total in center */}
-          <div className="relative h-[280px] w-full">
+          <div className="relative h-[360px] w-full overflow-visible">
             <TooltipProvider>
               <ResponsiveContainer width="100%" height="100%">
-                <PieChart margin={{ top: 20, right: 70, bottom: 20, left: 70 }}>
+                <PieChart margin={{ top: 30, right: 70, bottom: 30, left: 70 }}>
                   <Pie
                     data={data}
                     dataKey="count"
                     nameKey="vibe"
                     cx="50%"
                     cy="50%"
-                    innerRadius={42}
-                    outerRadius={68}
+                    innerRadius={60}
+                    outerRadius={95}
                     paddingAngle={2}
                     label={renderCustomLabel}
                     labelLine={renderLabelLine}
@@ -150,10 +158,10 @@ export function VibeAnalysisCard({
                 </PieChart>
               </ResponsiveContainer>
             </TooltipProvider>
-            {/* Center total - moved outside TooltipProvider and given lower z-index */}
+            {/* Center total */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
               <div className="text-center">
-                <div className="text-base font-bold text-foreground">Total: {totalCalls}</div>
+                <div className="text-2xl font-bold text-foreground">Total: {totalCalls}</div>
               </div>
             </div>
           </div>
