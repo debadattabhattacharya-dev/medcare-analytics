@@ -85,7 +85,7 @@ export const validRecords = allRecords.filter(
   (r) => r.Sentiment !== "N/A" && r.Duration > 10
 );
 
-// Calculate Net Happiness Score (NHS) - CAPPED AT 100%
+// Calculate Net Happiness Score (NHS) - Additive: (% Positive + % Improved Shift), CAPPED AT 100%
 export const calculateNHS = (records: CallRecord[]): number => {
   if (records.length === 0) return 0;
   
@@ -93,16 +93,9 @@ export const calculateNHS = (records: CallRecord[]): number => {
   const improvedShiftCount = records.filter((r) => 
     r.Emotional_Shift.includes("to Pos") || r.Emotional_Shift === "Neutral to Positive"
   ).length;
-  const negativeCount = records.filter((r) => r.Sentiment === "Negative").length;
-  const worsenedShiftCount = records.filter((r) => 
-    r.Emotional_Shift.includes("to Neg") || r.Emotional_Shift === "Positive to Negative"
-  ).length;
   
-  const happySignals = positiveCount + improvedShiftCount;
-  const unhappySignals = negativeCount + worsenedShiftCount;
-  
-  const rawNHS = Math.round(((happySignals - unhappySignals) / records.length) * 100);
-  return Math.min(100, Math.max(-100, rawNHS));
+  const rawNHS = Math.round(((positiveCount + improvedShiftCount) / records.length) * 100);
+  return Math.min(100, rawNHS);
 };
 
 // Get unique clinic locations
