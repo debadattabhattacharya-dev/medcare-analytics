@@ -151,7 +151,7 @@ export function VibeAnalysisCard({
             {/* Center total - moved outside TooltipProvider and given lower z-index */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
               <div className="text-center">
-                <div className="text-lg font-bold text-foreground">Total: {totalCalls}</div>
+                <div className="text-xl font-bold text-foreground">Total: {totalCalls}</div>
               </div>
             </div>
           </div>
