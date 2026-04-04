@@ -268,18 +268,32 @@ export const getTopUnhappyReasons = (records: CallRecord[]) => {
 export const getPersonaSentiment = (records: CallRecord[]) => {
   const personaMap = new Map<string, { positive: number; neutral: number; negative: number; total: number }>();
 
-  const allowed = new Set(["Patient", "Attendant", "Guardian"]);
+  // Map new dataset categories to meaningful "Who's Speaking" groups
+  const categoryMapping: Record<string, string> = {
+    "Patient": "Patient",
+    "Guardian": "Guardian",
+    "Attendant": "Attendant",
+    "feedback": "Patient",
+    "health follow-up": "Patient",
+    "service request": "Patient",
+    "Rating collection": "Patient",
+    "Recovery Check": "Patient",
+    "Health check": "Patient",
+  };
   
   records.forEach((r) => {
-    const persona = r.Patient_Advocate_Category;
-    if (persona && persona !== "N/A" && allowed.has(persona)) {
-      const existing = personaMap.get(persona) || { positive: 0, neutral: 0, negative: 0, total: 0 };
-      existing.total += 1;
-      if (r.Sentiment === "Positive") existing.positive += 1;
-      else if (r.Sentiment === "Neutral") existing.neutral += 1;
-      else if (r.Sentiment === "Negative") existing.negative += 1;
-      personaMap.set(persona, existing);
-    }
+    const raw = r.Patient_Advocate_Category;
+    if (!raw || raw === "N/A" || raw === "not applicable") return;
+    
+    const persona = categoryMapping[raw] || null;
+    if (!persona) return;
+    
+    const existing = personaMap.get(persona) || { positive: 0, neutral: 0, negative: 0, total: 0 };
+    existing.total += 1;
+    if (r.Sentiment === "Positive") existing.positive += 1;
+    else if (r.Sentiment === "Neutral") existing.neutral += 1;
+    else if (r.Sentiment === "Negative") existing.negative += 1;
+    personaMap.set(persona, existing);
   });
   
   return Array.from(personaMap.entries()).map(([persona, stats]) => ({
@@ -292,31 +306,35 @@ export const getPersonaSentiment = (records: CallRecord[]) => {
 };
 
 // Competitors to exclude (not real competitors)
-const excludedCompetitors = ["Bangkok", "Rethink Prov.", "South America", "No"];
+const excludedCompetitors = ["Bangkok", "Rethink Prov.", "South America", "No", "Yes", "N/A"];
 
 // Get competitor mentions
 export const getCompetitorMentions = (records: CallRecord[]) => {
   const competitorMap = new Map<string, number>();
   
   records.forEach((r) => {
-    if (r.Competitor_Mention_Flag === "Yes" && r.Competitor_Name && r.Competitor_Name !== "N/A") {
-      let name = r.Competitor_Name;
-      if (name.includes("Aster")) name = "Aster";
-      if (name.includes("NMC")) name = "NMC";
-      if (name.includes("Saudi German")) name = "Saudi German";
-      if (name.includes("Mediclinic")) name = "Mediclinic";
-      if (name.includes("King's")) name = "King's College";
-      if (name.includes("Dubai Hospital")) name = "Dubai Hospital";
-      if (name.includes("Other")) name = "Other Hospitals";
-      if (name.includes("Al Qasimi")) name = "Al Qasimi";
-      if (name.includes("Hospital Al Shifa")) name = "Al Shifa";
-      if (name.includes("CPH")) name = "CPH";
-      if (name.includes("Change")) name = "Other Hospitals";
-      
-      if (excludedCompetitors.includes(name)) return;
-      
-      competitorMap.set(name, (competitorMap.get(name) || 0) + 1);
-    }
+    // Check both flag-based and name-based detection
+    const hasCompetitor = r.Competitor_Mention_Flag === "Yes" || 
+      (r.Competitor_Name && r.Competitor_Name !== "N/A" && r.Competitor_Name !== "No" && r.Competitor_Name !== "Yes");
+    
+    if (!hasCompetitor || !r.Competitor_Name) return;
+    
+    let name = r.Competitor_Name;
+    if (name.includes("Aster")) name = "Aster";
+    else if (name.includes("NMC")) name = "NMC";
+    else if (name.includes("Saudi German")) name = "Saudi German";
+    else if (name.includes("Mediclinic")) name = "Mediclinic";
+    else if (name.includes("King's")) name = "King's College";
+    else if (name.includes("Dubai Hospital")) name = "Dubai Hospital";
+    else if (name.includes("Other")) name = "Other Hospitals";
+    else if (name.includes("Al Qasimi")) name = "Al Qasimi";
+    else if (name.includes("Hospital Al Shifa") || name.includes("Al Shifa")) name = "Al Shifa";
+    else if (name.includes("CPH")) name = "CPH";
+    else if (name.includes("Change")) name = "Other Hospitals";
+    
+    if (excludedCompetitors.includes(name)) return;
+    
+    competitorMap.set(name, (competitorMap.get(name) || 0) + 1);
   });
   
   const total = Array.from(competitorMap.values()).reduce((a, b) => a + b, 0);
@@ -334,25 +352,24 @@ export type CompetitorImpact = "Good to Medcare" | "Bad to Medcare" | "Neutral";
 
 export const getCompetitorMentionDetails = (records: CallRecord[]) => {
   return records
-    .filter(
-      (r) =>
-        r.Competitor_Mention_Flag === "Yes" &&
-        r.Competitor_Name &&
-        r.Competitor_Name !== "N/A",
-    )
+    .filter((r) => {
+      const hasCompetitor = r.Competitor_Mention_Flag === "Yes" || 
+        (r.Competitor_Name && r.Competitor_Name !== "N/A" && r.Competitor_Name !== "No" && r.Competitor_Name !== "Yes");
+      return hasCompetitor && r.Competitor_Name;
+    })
     .map((r) => {
       let name = r.Competitor_Name;
       if (name.includes("Aster")) name = "Aster";
-      if (name.includes("NMC")) name = "NMC";
-      if (name.includes("Saudi German")) name = "Saudi German";
-      if (name.includes("Mediclinic")) name = "Mediclinic";
-      if (name.includes("King's")) name = "King's College";
-      if (name.includes("Dubai Hospital")) name = "Dubai Hospital";
-      if (name.includes("Other")) name = "Other Hospitals";
-      if (name.includes("Al Qasimi")) name = "Al Qasimi";
-      if (name.includes("Hospital Al Shifa")) name = "Al Shifa";
-      if (name.includes("CPH")) name = "CPH";
-      if (name.includes("Change")) name = "Other Hospitals";
+      else if (name.includes("NMC")) name = "NMC";
+      else if (name.includes("Saudi German")) name = "Saudi German";
+      else if (name.includes("Mediclinic")) name = "Mediclinic";
+      else if (name.includes("King's")) name = "King's College";
+      else if (name.includes("Dubai Hospital")) name = "Dubai Hospital";
+      else if (name.includes("Other")) name = "Other Hospitals";
+      else if (name.includes("Al Qasimi")) name = "Al Qasimi";
+      else if (name.includes("Hospital Al Shifa") || name.includes("Al Shifa")) name = "Al Shifa";
+      else if (name.includes("CPH")) name = "CPH";
+      else if (name.includes("Change")) name = "Other Hospitals";
 
       let impact: CompetitorImpact = "Neutral";
       if (r.Churn_Threat === "High" || r.Sentiment === "Negative") impact = "Bad to Medcare";
@@ -380,13 +397,16 @@ export const getVibeAnalysis = (records: CallRecord[]) => {
     if (r.Vibe && r.Vibe !== "N/A" && r.Vibe !== "Automated") {
       let category = "Other";
       const vibe = r.Vibe.toLowerCase();
-      if (vibe.includes("frustrated") || vibe.includes("dissatisfied") || vibe.includes("angry")) category = "Frustrated";
+      if (vibe.includes("frustrated") || vibe.includes("dissatisfied") || vibe.includes("angry") || vibe.includes("upset")) category = "Frustrated";
       else if (vibe.includes("concerned") || vibe.includes("confused") || vibe.includes("anxious")) category = "Concerned";
-      else if (vibe.includes("appreciative") || vibe.includes("positive")) category = "Appreciative";
+      else if (vibe.includes("appreciative") || vibe.includes("grateful")) category = "Appreciative";
       else if (vibe.includes("cooperative")) category = "Cooperative";
       else if (vibe.includes("polite") || vibe.includes("courteous")) category = "Polite";
-      else if (vibe.includes("brief")) category = "Brief";
-      else if (vibe.includes("professional")) category = "Professional";
+      else if (vibe.includes("satisfied") || vibe.includes("positive")) category = "Positive";
+      else if (vibe.includes("reassuring") || vibe.includes("helpful")) category = "Reassuring";
+      else if (vibe.includes("professional") || vibe.includes("brief")) category = "Professional";
+      else if (vibe.includes("feedback")) category = "Feedback";
+      else if (vibe.includes("follow-up") || vibe.includes("follow up")) category = "Follow-up";
       
       vibeMap.set(category, (vibeMap.get(category) || 0) + 1);
     }
