@@ -1,8 +1,9 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { CallRecord, getHighChurnCases } from "@/data/medcareData";
-import { AlertCircle, Phone, MapPin, Clock, Lightbulb } from "lucide-react";
+import { AlertCircle, Phone, MapPin, Clock, Lightbulb, ChevronLeft, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
 
 interface WarRoomTriageProps {
@@ -10,19 +11,21 @@ interface WarRoomTriageProps {
   selectedLocation?: string | null;
 }
 
+const PAGE_SIZE = 10;
+
 export function WarRoomTriage({ data, selectedLocation }: WarRoomTriageProps) {
-  const highChurnCases = useMemo(() => {
+  const [page, setPage] = useState(0);
+
+  const allHighChurnCases = useMemo(() => {
     const filteredData = selectedLocation
       ? data.filter((r) => r.Clinic_Location === selectedLocation)
       : data;
     
-    return getHighChurnCases(filteredData)
-      .slice(0, 5)
-      .map((c) => ({
-        ...c,
-        revenueAtRisk: 50000, // AED 50,000 per high churn case
-      }));
+    return getHighChurnCases(filteredData);
   }, [data, selectedLocation]);
+
+  const totalPages = Math.ceil(allHighChurnCases.length / PAGE_SIZE);
+  const paginatedCases = allHighChurnCases.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
 
   return (
     <Card className="shadow-healthcare border-coral/20">
@@ -30,10 +33,10 @@ export function WarRoomTriage({ data, selectedLocation }: WarRoomTriageProps) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <AlertCircle className="h-5 w-5 text-coral animate-pulse-soft" />
-            <CardTitle className="text-lg font-semibold">War Room Triage Center</CardTitle>
+            <CardTitle className="text-lg font-semibold">Brand Aversion Center</CardTitle>
           </div>
           <Badge variant="destructive" className="text-sm">
-            {highChurnCases.length} Critical Cases
+            {allHighChurnCases.length} Critical Cases
           </Badge>
         </div>
         <p className="text-sm text-muted-foreground">
@@ -42,7 +45,7 @@ export function WarRoomTriage({ data, selectedLocation }: WarRoomTriageProps) {
         </p>
       </CardHeader>
       <CardContent className="pt-4">
-        {highChurnCases.length === 0 ? (
+        {allHighChurnCases.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-8 text-center">
             <div className="h-16 w-16 rounded-full bg-success-light flex items-center justify-center mb-4">
               <span className="text-2xl">✓</span>
@@ -51,16 +54,15 @@ export function WarRoomTriage({ data, selectedLocation }: WarRoomTriageProps) {
           </div>
         ) : (
           <div className="space-y-4">
-            {highChurnCases.map((caseData, index) => (
+            {paginatedCases.map((caseData, index) => (
               <div
                 key={caseData.Call_ID}
-                className="rounded-lg border border-coral/20 bg-coral/5 p-4 transition-all hover:border-coral/40 hover:shadow-md animate-slide-in-right"
-                style={{ animationDelay: `${index * 100}ms` }}
+                className="rounded-lg border border-coral/20 bg-coral/5 p-4 transition-all hover:border-coral/40 hover:shadow-md"
               >
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-3">
                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-coral text-white text-sm font-bold">
-                      {index + 1}
+                      {page * PAGE_SIZE + index + 1}
                     </div>
                     <div>
                       <p className="font-semibold text-foreground">{caseData.Customer_Name}</p>
@@ -103,6 +105,36 @@ export function WarRoomTriage({ data, selectedLocation }: WarRoomTriageProps) {
                 </div>
               </div>
             ))}
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between pt-2 border-t">
+                <p className="text-sm text-muted-foreground">
+                  Showing {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, allHighChurnCases.length)} of {allHighChurnCases.length}
+                </p>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPage((p) => Math.max(0, p - 1))}
+                    disabled={page === 0}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <span className="text-sm font-medium">
+                    {page + 1} / {totalPages}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                    disabled={page === totalPages - 1}
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </CardContent>
