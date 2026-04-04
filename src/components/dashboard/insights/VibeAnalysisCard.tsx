@@ -123,7 +123,7 @@ export function VibeAnalysisCard({
                     nameKey="vibe"
                     cx="50%"
                     cy="50%"
-                    innerRadius={48}
+                    innerRadius={56}
                     outerRadius={70}
                     paddingAngle={2}
                     label={renderCustomLabel}
@@ -161,8 +161,9 @@ export function VibeAnalysisCard({
             </TooltipProvider>
             {/* Center total */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-foreground">Total: {totalCalls}</div>
+              <div className="flex items-end justify-center gap-1 whitespace-nowrap leading-none">
+                <span className="text-[0.72rem] font-medium text-muted-foreground">Total:</span>
+                <span className="text-[1.9rem] font-bold tabular-nums tracking-tight text-foreground">{totalCalls}</span>
               </div>
             </div>
           </div>
