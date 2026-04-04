@@ -129,45 +129,65 @@ export const getUnhappyCases = (records: CallRecord[]) => {
   return records.filter((r) => r.Sentiment === "Negative");
 };
 
+// Extract clean doctor name from verbose text
+const extractDoctorName = (raw: string): string | null => {
+  if (!raw || raw === "N/A" || raw === "No" || raw === "Yes") return null;
+  
+  const skip = [
+    "did not", "does not", "no mention", "not mention", "not explicitly",
+    "no specific", "neither", "voicemail", "insufficient", "fragmented",
+    "no dissatisfaction", "appreciation", "scheduling", "treatment ref",
+    "care ref", "care reference", "generically"
+  ];
+  const lower = raw.toLowerCase();
+  if (skip.some(s => lower === s || (lower.length < 80 && lower.includes(s) && !lower.includes("dr.")))) return null;
+
+  // Try to extract "Dr. FirstName LastName" pattern from the text
+  const drMatch = raw.match(/Dr\.\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/);
+  if (drMatch) return `Dr. ${drMatch[1]}`;
+
+  // Try "Mr./Ms." patterns
+  const mrMatch = raw.match(/(?:Mr|Ms|Mrs)\.\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)/);
+  if (mrMatch) return mrMatch[0];
+
+  // If the raw value itself is a clean short name starting with Dr.
+  if (raw.startsWith("Dr.") && raw.length < 30) return raw.trim();
+
+  return null;
+};
+
 // Get doctor performance data with realistic CSAT variation
 export const getDoctorPerformance = (records: CallRecord[]) => {
   const doctorMap = new Map<string, { mentions: number; totalCSAT: number; count: number; totalNPS: number; negativeCount: number; positiveCount: number }>();
   
   records.forEach((r) => {
-    if (r.Doctor_Name && r.Doctor_Name !== "N/A" && r.Doctor_Name !== "N/A") {
-      let name = r.Doctor_Name;
-      // Remove slash names - keep only first
-      if (name.includes("/")) name = name.split("/")[0].trim();
+    const name = extractDoctorName(r.Doctor_Name);
+    if (!name) return;
+    
+    const normalized = name.replace(/\s+/g, ' ').trim();
       
-      const existing = doctorMap.get(name) || { mentions: 0, totalCSAT: 0, count: 0, totalNPS: 0, negativeCount: 0, positiveCount: 0 };
-      existing.mentions += 1;
-      if (r.Doctor_CSAT > 0) {
-        existing.totalCSAT += r.Doctor_CSAT;
-        existing.count += 1;
-      }
-      if (r.NPS_Score_10 > 0) {
-        existing.totalNPS += r.NPS_Score_10;
-      }
-      if (r.Sentiment === "Negative") existing.negativeCount += 1;
-      if (r.Sentiment === "Positive") existing.positiveCount += 1;
-      doctorMap.set(name, existing);
+    const existing = doctorMap.get(normalized) || { mentions: 0, totalCSAT: 0, count: 0, totalNPS: 0, negativeCount: 0, positiveCount: 0 };
+    existing.mentions += 1;
+    if (r.Doctor_CSAT > 0) {
+      existing.totalCSAT += r.Doctor_CSAT;
+      existing.count += 1;
     }
+    if (r.NPS_Score_10 > 0) {
+      existing.totalNPS += r.NPS_Score_10;
+    }
+    if (r.Sentiment === "Negative") existing.negativeCount += 1;
+    if (r.Sentiment === "Positive") existing.positiveCount += 1;
+    doctorMap.set(normalized, existing);
   });
   
   return Array.from(doctorMap.entries())
     .filter(([, stats]) => stats.mentions >= 2)
     .map(([name, stats]) => {
-      // Calculate base CSAT from actual data
       let baseCSAT = stats.count > 0 ? stats.totalCSAT / stats.count : 3.5;
-      
-      // Adjust based on sentiment ratio
       const sentimentRatio = stats.mentions > 0 ? stats.negativeCount / stats.mentions : 0;
       const adjustment = sentimentRatio * 2;
-      
-      // Apply a unique variation based on doctor name hash for consistency
       const nameHash = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
       const uniqueVariation = ((nameHash % 10) / 10) * 0.8;
-      
       const adjustedCSAT = Math.max(2.5, Math.min(5, baseCSAT - adjustment - uniqueVariation));
       
       return {
