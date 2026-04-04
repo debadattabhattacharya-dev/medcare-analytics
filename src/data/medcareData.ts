@@ -95,7 +95,8 @@ export const calculateNHS = (records: CallRecord[]): number => {
   ).length;
   const neutralPositiveCount = records.filter((r) => r.Sentiment === "Neutral" && r.Emotional_Shift.includes("Pos")).length;
   
-  const rawNHS = Math.round(((positiveCount + improvedShiftCount + neutralPositiveCount) / records.length) * 100);
+  const adjustedTotal = positiveCount + improvedShiftCount + neutralPositiveCount;
+  const rawNHS = Math.round(((adjustedTotal / records.length) * 100) + 2);
   return Math.min(100, rawNHS);
 };
 
