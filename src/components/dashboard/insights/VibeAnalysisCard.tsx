@@ -38,7 +38,7 @@ export function VibeAnalysisCard({
     const x = cx + radius * Math.cos(-midAngle * RADIAN);
     const y = cy + radius * Math.sin(-midAngle * RADIAN);
 
-    if (percentage < 10) return null; // Only show labels for large segments
+    if (percentage < 15) return null;
 
     // Truncate long names
     const displayName = vibe.length > 8 ? vibe.substring(0, 7) + '.' : vibe;
