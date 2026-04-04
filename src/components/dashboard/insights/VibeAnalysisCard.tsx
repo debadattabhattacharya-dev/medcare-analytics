@@ -32,36 +32,34 @@ export function VibeAnalysisCard({
   };
 
   // Custom label with pointer lines
-  const renderCustomLabel = ({ vibe, percentage, cx, cy, midAngle, outerRadius }: any) => {
+  const renderCustomLabel = ({ vibe, percentage, cx, cy, midAngle, outerRadius, viewBox }: any) => {
     const RADIAN = Math.PI / 180;
-    const radius = outerRadius + 22;
+    const radius = outerRadius + 28;
     const x = cx + radius * Math.cos(-midAngle * RADIAN);
     const y = cy + radius * Math.sin(-midAngle * RADIAN);
 
     if (percentage < 5) return null;
-
-    // Shorten name to fit
-    const shortNames: Record<string, string> = {
-      Professional: "Prof.",
-      Appreciative: "Appr.",
-      Cooperative: "Coop.",
-      Reassuring: "Reas.",
-      "Follow-up": "F.up",
-      Feedback: "Fdbk.",
-      Positive: "Pos.",
-    };
-    const displayName = shortNames[vibe] || (vibe.length > 6 ? vibe.substring(0, 5) + "." : vibe);
+    const isRightSide = x > cx;
+    const fontSize = vibe.length > 10 ? 9 : 10;
+    const estimatedTextWidth = (vibe.length + String(percentage).length + 3) * fontSize * 0.56;
+    const chartWidth = viewBox?.width ?? 0;
+    const horizontalPadding = 8;
+    const labelX = chartWidth
+      ? isRightSide
+        ? Math.min(x + 4, chartWidth - estimatedTextWidth - horizontalPadding)
+        : Math.max(x - 4, estimatedTextWidth + horizontalPadding)
+      : x;
 
     return (
       <text
-        x={x}
+        x={labelX}
         y={y}
         fill="hsl(var(--foreground))"
-        textAnchor={x > cx ? "start" : "end"}
+        textAnchor={isRightSide ? "start" : "end"}
         dominantBaseline="central"
-        style={{ fontSize: 10, fontWeight: 500 }}
+        style={{ fontSize, fontWeight: 500 }}
       >
-        {displayName}: {percentage}%
+        {vibe}: {percentage}%
       </text>
     );
   };
@@ -72,8 +70,8 @@ export function VibeAnalysisCard({
     if (payload.percentage < 5) return null;
     
     const RADIAN = Math.PI / 180;
-    const startRadius = outerRadius + 4;
-    const endRadius = outerRadius + 18;
+    const startRadius = outerRadius + 6;
+    const endRadius = outerRadius + 22;
     
     const x1 = cx + startRadius * Math.cos(-midAngle * RADIAN);
     const y1 = cy + startRadius * Math.sin(-midAngle * RADIAN);
@@ -113,18 +111,18 @@ export function VibeAnalysisCard({
       <CardContent className="overflow-visible">
         <div className="flex flex-col items-center">
           {/* Donut chart with total in center */}
-          <div className="relative h-[360px] w-full overflow-visible">
+          <div className="relative h-[390px] w-full overflow-visible">
             <TooltipProvider>
               <ResponsiveContainer width="100%" height="100%">
-                <PieChart margin={{ top: 30, right: 80, bottom: 30, left: 85 }}>
+                <PieChart margin={{ top: 28, right: 72, bottom: 28, left: 72 }}>
                   <Pie
                     data={data}
                     dataKey="count"
                     nameKey="vibe"
                     cx="50%"
                     cy="50%"
-                    innerRadius={56}
-                    outerRadius={70}
+                    innerRadius={52}
+                    outerRadius={84}
                     paddingAngle={2}
                     label={renderCustomLabel}
                     labelLine={renderLabelLine}
