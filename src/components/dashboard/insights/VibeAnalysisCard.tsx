@@ -104,19 +104,21 @@ export function VibeAnalysisCard({
       <CardContent>
         <div className="flex flex-col items-center">
           {/* Donut chart with total in center */}
-          <div className="relative h-[240px] w-full">
+          <div className="relative h-[280px] w-full">
             <TooltipProvider>
               <ResponsiveContainer width="100%" height="100%">
-                <PieChart margin={{ top: 10, right: 10, bottom: 10, left: 10 }}>
+                <PieChart margin={{ top: 20, right: 70, bottom: 20, left: 70 }}>
                   <Pie
                     data={data}
                     dataKey="count"
                     nameKey="vibe"
                     cx="50%"
                     cy="50%"
-                    innerRadius={55}
-                    outerRadius={85}
+                    innerRadius={42}
+                    outerRadius={68}
                     paddingAngle={2}
+                    label={renderCustomLabel}
+                    labelLine={renderLabelLine}
                     style={{ cursor: "pointer" }}
                     onClick={(entry: any) => onPickVibe(entry?.vibe)}
                   >
