@@ -45,7 +45,7 @@ export function PatientPainHeatmap({
         matrix[loc][concern] = {
           unhappy: unhappyRecords.length,
           total: cellRecords.length,
-          percentage: locationTotal > 0 ? Math.round((unhappyRecords.length / locationTotal) * 100) : 0,
+          percentage: locationTotal > 0 ? parseFloat(((unhappyRecords.length / locationTotal) * 100).toFixed(1)) : 0,
         };
       });
     });
