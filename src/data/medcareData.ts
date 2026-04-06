@@ -247,7 +247,7 @@ export const getTopUnhappyReasons = (records: CallRecord[]) => {
     }
   });
   
-  const total = Array.from(reasonMap.values()).reduce((a, b) => a + b, 0);
+  const totalRecords = records.length;
   
   return Array.from(reasonMap.entries())
     .sort((a, b) => b[1] - a[1])
@@ -255,7 +255,7 @@ export const getTopUnhappyReasons = (records: CallRecord[]) => {
     .map(([reason, count]) => ({
       reason,
       count,
-      percentage: total > 0 ? Math.round((count / total) * 100) : 0,
+      percentage: totalRecords > 0 ? Math.round((count / totalRecords) * 100) : 0,
     }));
 };
 
