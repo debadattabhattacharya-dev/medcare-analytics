@@ -33,14 +33,14 @@ export function WarRoomTriage({ data, selectedLocation }: WarRoomTriageProps) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <AlertCircle className="h-5 w-5 text-coral animate-pulse-soft" />
-            <CardTitle className="text-lg font-semibold">Brand Aversion Center</CardTitle>
+            <CardTitle className="text-lg font-semibold">Actively Disengaged Center</CardTitle>
           </div>
           <Badge variant="destructive" className="text-sm">
             {allHighChurnCases.length} Critical Cases
           </Badge>
         </div>
         <p className="text-sm text-muted-foreground">
-          Brand aversion cases requiring immediate attention
+          Actively disengaged cases requiring immediate attention
           {selectedLocation && ` • ${selectedLocation}`}
         </p>
       </CardHeader>
@@ -83,7 +83,7 @@ export function WarRoomTriage({ data, selectedLocation }: WarRoomTriageProps) {
                     </div>
                   </div>
                   <Badge variant="destructive" className="shrink-0">
-                    Brand Aversion
+                    Actively Disengaged
                   </Badge>
                 </div>
 

@@ -74,7 +74,7 @@ export function DashboardHeader({ selectedLocation, onClearFilter }: DashboardHe
               <Badge variant="destructive" className="rounded-full px-2 py-1">
                 {metrics.highChurnCount}
               </Badge>
-              <span className="text-sm text-muted-foreground">Brand Aversion</span>
+              <span className="text-sm text-muted-foreground">Actively Disengaged</span>
             </div>
 
             {/* Filter Indicator */}
