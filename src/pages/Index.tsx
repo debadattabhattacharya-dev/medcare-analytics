@@ -58,21 +58,21 @@ const Index = () => {
             variant="default"
           />
           <MetricCard
-            title="Happy Patients"
+            title="Actively Engaged"
             value={happyCases.length}
             subtitle={`${Math.round((happyCases.length / filteredData.length) * 100)}% of total`}
             icon={ThumbsUp}
             variant="teal"
           />
           <MetricCard
-            title="Unhappy Patients"
+            title="Disengaged"
             value={unhappyCases.length}
             subtitle="Needs attention"
             icon={ThumbsDown}
             variant="coral"
           />
           <MetricCard
-            title="Brand Aversion"
+            title="Actively Disengaged"
             value={highChurnCases.length}
             subtitle="Patients at risk"
             icon={AlertTriangle}
