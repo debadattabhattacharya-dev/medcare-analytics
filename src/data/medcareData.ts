@@ -443,13 +443,30 @@ export const getVibeAnalysis = (records: CallRecord[]) => {
     }));
 };
 
+export const normalizeConcernCategory = (category: string): string | null => {
+  const clean = category?.trim();
+  if (!clean || clean === "N/A" || clean === "Not Applicable") return null;
+
+  const normalized = clean.toLowerCase().replace(/[&_/.-]+/g, " ").replace(/\s+/g, " ").trim();
+
+  if (normalized.includes("process")) return "Process";
+  if (normalized.includes("service")) return "Service";
+  if (normalized.includes("billing") || normalized.includes("bill") || normalized.includes("payment") || normalized.includes("cost")) return "Billing";
+  if (normalized.includes("appointment") || normalized.includes("schedul")) return "Appointment";
+  if (normalized.includes("insurance") || normalized.includes("approval")) return "Insurance";
+  if (normalized.includes("doctor") || normalized.includes("clinical") || normalized.includes("treatment")) return "Clinical Care";
+  if (normalized.includes("staff") || normalized.includes("nurse") || normalized.includes("behavior")) return "Staff";
+  if (normalized.includes("facility") || normalized.includes("parking") || normalized.includes("room")) return "Facility";
+
+  return clean;
+};
+
 // Get concern categories for heatmap
 export const getConcernCategories = (records: CallRecord[]): string[] => {
   const categories = new Set<string>();
   records.forEach((r) => {
-    if (r.Primary_Concern_Category && r.Primary_Concern_Category !== "N/A" && r.Primary_Concern_Category !== "Not Applicable") {
-      categories.add(r.Primary_Concern_Category);
-    }
+    const category = normalizeConcernCategory(r.Primary_Concern_Category);
+    if (category) categories.add(category);
   });
   return Array.from(categories).sort();
 };
