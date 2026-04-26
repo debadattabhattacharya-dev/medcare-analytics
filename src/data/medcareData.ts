@@ -453,17 +453,26 @@ export const normalizeConcernCategory = (category: string): string | null => {
   if (!clean || lowerClean === "n/a" || lowerClean.includes("not applicable")) return null;
 
   const normalized = lowerClean.replace(/[&_/.-]+/g, " ").replace(/\s+/g, " ").trim();
+  const toTitleCase = (value: string) =>
+    value
+      .toLowerCase()
+      .split(" ")
+      .filter(Boolean)
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
 
   if (normalized.includes("process")) return "Process";
   if (normalized.includes("service")) return "Service";
   if (normalized.includes("billing") || normalized.includes("bill") || normalized.includes("payment") || normalized.includes("cost")) return "Billing";
   if (normalized.includes("appointment") || normalized.includes("schedul")) return "Appointment";
   if (normalized.includes("insurance") || normalized.includes("approval")) return "Insurance";
+  if (normalized.includes("documentation") || normalized.includes("document") || normalized.includes("report")) return "Documentation";
+  if (normalized.includes("discharge")) return "Discharge";
   if (normalized.includes("doctor") || normalized.includes("clinical") || normalized.includes("treatment")) return "Clinical Care";
   if (normalized.includes("staff") || normalized.includes("nurse") || normalized.includes("behavior")) return "Staff";
   if (normalized.includes("facility") || normalized.includes("parking") || normalized.includes("room")) return "Facility";
 
-  return clean;
+  return toTitleCase(clean);
 };
 
 // Get concern categories for heatmap
