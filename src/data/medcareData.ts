@@ -445,9 +445,10 @@ export const getVibeAnalysis = (records: CallRecord[]) => {
 
 export const normalizeConcernCategory = (category: string): string | null => {
   const clean = category?.trim();
-  if (!clean || clean === "N/A" || clean === "Not Applicable") return null;
+  const lowerClean = clean?.toLowerCase();
+  if (!clean || lowerClean === "n/a" || lowerClean.includes("not applicable")) return null;
 
-  const normalized = clean.toLowerCase().replace(/[&_/.-]+/g, " ").replace(/\s+/g, " ").trim();
+  const normalized = lowerClean.replace(/[&_/.-]+/g, " ").replace(/\s+/g, " ").trim();
 
   if (normalized.includes("process")) return "Process";
   if (normalized.includes("service")) return "Service";
