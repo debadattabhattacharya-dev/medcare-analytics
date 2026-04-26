@@ -104,6 +104,18 @@ export const calculateNHS = (records: CallRecord[]): number => {
   return Math.min(100, rawNHS);
 };
 
+// Calculate Net Promoter Score (NPS): % Promoters (9-10) - % Detractors (0-6)
+// Only includes records where an NPS score was actually captured.
+export const calculateNPS = (records: CallRecord[]): number => {
+  const scoredRecords = records.filter((r) => r.NPS_Score_10 > 0);
+  if (scoredRecords.length === 0) return 0;
+
+  const promoters = scoredRecords.filter((r) => r.NPS_Score_10 >= 9).length;
+  const detractors = scoredRecords.filter((r) => r.NPS_Score_10 <= 6).length;
+
+  return Math.round(((promoters - detractors) / scoredRecords.length) * 100);
+};
+
 // Get unique clinic locations
 export const getClinicLocations = (records: CallRecord[]): string[] => {
   const locations = new Set<string>();
