@@ -259,6 +259,31 @@ export const getTopUnhappyReasons = (records: CallRecord[]) => {
     }));
 };
 
+export const getOtherIssueBreakdown = (records: CallRecord[]) => {
+  const reasonMap = new Map<string, number>();
+
+  records.forEach(r => {
+    if (r.Unhappy_Reason && r.Unhappy_Reason !== "N/A") {
+      const category = categorizePainPoint(r.Unhappy_Reason);
+      if (category === "Other Issues") {
+        const cleanReason = r.Unhappy_Reason.trim();
+        reasonMap.set(cleanReason, (reasonMap.get(cleanReason) || 0) + 1);
+      }
+    }
+  });
+
+  const totalOtherIssues = Array.from(reasonMap.values()).reduce((sum, count) => sum + count, 0);
+
+  return Array.from(reasonMap.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 8)
+    .map(([reason, count]) => ({
+      reason,
+      count,
+      percentage: totalOtherIssues > 0 ? Math.round((count / totalOtherIssues) * 100) : 0,
+    }));
+};
+
 // Get persona distribution by sentiment
 export const getPersonaSentiment = (records: CallRecord[]) => {
   const personaMap = new Map<string, { positive: number; neutral: number; negative: number; total: number }>();

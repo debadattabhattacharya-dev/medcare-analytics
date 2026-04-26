@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
@@ -7,8 +7,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CallRecord, getTopUnhappyReasons, getFilteredClinicLocations } from "@/data/medcareData";
-import { AlertTriangle, TrendingDown } from "lucide-react";
+import { CallRecord, getTopUnhappyReasons, getFilteredClinicLocations, getOtherIssueBreakdown } from "@/data/medcareData";
+import { AlertTriangle, ChevronDown, TrendingDown } from "lucide-react";
 
 interface TopIssuesListProps {
   data: CallRecord[];
@@ -17,6 +17,7 @@ interface TopIssuesListProps {
 }
 
 export function TopIssuesList({ data, selectedLocation, onFilterChange }: TopIssuesListProps) {
+  const [isOtherOpen, setIsOtherOpen] = useState(false);
   const clinicLocations = useMemo(() => getFilteredClinicLocations(data), [data]);
 
   // Derive localFilter from selectedLocation for controlled behavior
@@ -34,6 +35,13 @@ export function TopIssuesList({ data, selectedLocation, onFilterChange }: TopIss
       ? data.filter((r) => r.Clinic_Location === selectedLocation)
       : data;
     return getTopUnhappyReasons(filteredData);
+  }, [data, selectedLocation]);
+
+  const otherIssueBreakdown = useMemo(() => {
+    const filteredData = selectedLocation
+      ? data.filter((r) => r.Clinic_Location === selectedLocation)
+      : data;
+    return getOtherIssueBreakdown(filteredData);
   }, [data, selectedLocation]);
 
   const maxCount = issues.length > 0 ? Math.max(...issues.map((i) => i.count)) : 1;
@@ -85,7 +93,10 @@ export function TopIssuesList({ data, selectedLocation, onFilterChange }: TopIss
           </div>
         ) : (
           <div className="space-y-4">
-            {issues.map((issue, index) => (
+            {issues.map((issue, index) => {
+              const isOtherIssue = issue.reason === "Other Issues" && otherIssueBreakdown.length > 0;
+
+              return (
               <div key={issue.reason} className="space-y-1.5">
                 <div className="flex items-center gap-3">
                   {/* Rank badge */}
@@ -96,9 +107,21 @@ export function TopIssuesList({ data, selectedLocation, onFilterChange }: TopIss
                   </div>
                   
                   {/* Issue name */}
-                  <span className="text-sm font-medium flex-1 truncate" title={issue.reason}>
-                    {issue.reason}
-                  </span>
+                  {isOtherIssue ? (
+                    <button
+                      type="button"
+                      onClick={() => setIsOtherOpen((open) => !open)}
+                      className="flex min-w-0 flex-1 items-center gap-1 text-left text-sm font-medium hover:text-coral"
+                      aria-expanded={isOtherOpen}
+                    >
+                      <span className="truncate" title={issue.reason}>{issue.reason}</span>
+                      <ChevronDown className={`h-3.5 w-3.5 shrink-0 transition-transform ${isOtherOpen ? "rotate-180" : ""}`} />
+                    </button>
+                  ) : (
+                    <span className="text-sm font-medium flex-1 truncate" title={issue.reason}>
+                      {issue.reason}
+                    </span>
+                  )}
                   
                   {/* Count */}
                   <span className="text-sm font-semibold w-8 text-right">{issue.count}</span>
@@ -118,8 +141,24 @@ export function TopIssuesList({ data, selectedLocation, onFilterChange }: TopIss
                     />
                   </div>
                 </div>
+
+                {isOtherIssue && isOtherOpen && (
+                  <div className="ml-9 mt-2 space-y-2 rounded-md border bg-muted/30 p-3">
+                    {otherIssueBreakdown.map((subIssue) => (
+                      <div key={subIssue.reason} className="flex items-start justify-between gap-3 text-xs">
+                        <span className="min-w-0 flex-1 text-muted-foreground" title={subIssue.reason}>
+                          {subIssue.reason}
+                        </span>
+                        <span className="shrink-0 font-semibold text-foreground">
+                          {subIssue.count} • {subIssue.percentage}%
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </CardContent>
