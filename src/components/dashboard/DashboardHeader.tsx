@@ -5,6 +5,7 @@ import {
   allRecords,
   validRecords,
   calculateNHS,
+  calculateNPS,
   getHighChurnCases,
 } from "@/data/medcareData";
 import { MedcareLogo } from "./MedcareLogo";
@@ -26,11 +27,13 @@ export function DashboardHeader({ selectedLocation, onClearFilter }: DashboardHe
       : allRecords;
 
     const nhs = calculateNHS(filteredValid);
+    const nps = calculateNPS(filteredValid);
     const highChurnCases = getHighChurnCases(filteredValid);
     const revenueAtRisk = highChurnCases.length * 50000;
 
     return {
       nhs,
+      nps,
       totalCalls: filteredAll.length,
       highChurnCount: highChurnCases.length,
       revenueAtRisk,
@@ -64,6 +67,16 @@ export function DashboardHeader({ selectedLocation, onClearFilter }: DashboardHe
               <div className="text-right">
                 <p className="text-xs text-muted-foreground">Net Happiness</p>
                 <p className="text-lg font-bold text-teal">{metrics.nhs}%</p>
+              </div>
+            </div>
+
+            <div className="h-8 w-px bg-border" />
+
+            {/* NPS Score */}
+            <div className="flex items-center gap-2">
+              <div className="text-right">
+                <p className="text-xs text-muted-foreground">NPS Score</p>
+                <p className="text-lg font-bold text-foreground">{metrics.nps}</p>
               </div>
             </div>
 
