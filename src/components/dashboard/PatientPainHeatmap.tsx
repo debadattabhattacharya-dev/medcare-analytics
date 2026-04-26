@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CallRecord, getFilteredClinicLocations, getConcernCategories } from "@/data/medcareData";
+import { CallRecord, getFilteredClinicLocations, getConcernCategories, normalizeConcernCategory } from "@/data/medcareData";
 import { cn } from "@/lib/utils";
 
 interface PatientPainHeatmapProps {
@@ -33,7 +33,7 @@ export function PatientPainHeatmap({
       const locationTotal = locationTotals[loc];
       concerns.forEach((concern) => {
         const cellRecords = data.filter(
-          (r) => r.Clinic_Location === loc && r.Primary_Concern_Category === concern
+          (r) => r.Clinic_Location === loc && normalizeConcernCategory(r.Primary_Concern_Category) === concern
         );
         const unhappyRecords = cellRecords.filter(
           (r) =>
