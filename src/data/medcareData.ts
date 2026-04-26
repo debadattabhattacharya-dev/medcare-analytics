@@ -480,7 +480,7 @@ export const getConcernCategories = (records: CallRecord[]): string[] => {
   const categories = new Set<string>();
   records.forEach((r) => {
     const category = normalizeConcernCategory(r.Primary_Concern_Category);
-    if (category) categories.add(category);
+    if (category && category !== "General") categories.add(category);
   });
   return Array.from(categories).sort();
 };
